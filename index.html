@@ -2,386 +2,798 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Irrigation Control Center</title>
-    
-    <!-- Firebase Legacy SDK (CDN) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SIP-CONSOLE | Advanced Controller Node</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            
-            --primary: #10b981;    /* Emerald Green */
-            --secondary: #3b82f6;  /* Electric Blue */
-            --warning: #f59e0b;    /* Amber */
-            --danger: #ef4444;     /* Rose Red */
-            --purple: #8b5cf6;     /* Purple */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #030712;
+            -webkit-tap-highlight-color: transparent;
         }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: var(--bg-gradient);
-            min-height: 100vh;
-            margin: 0;
-            padding: 30px 20px;
-            color: var(--text-main);
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .app-container {
+            background-color: #0b1324;
         }
-
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
+        .panel-card {
+            background-color: #111c32;
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
+        .input-field {
+            background-color: #090f1d;
+            border: 1px solid #1e293b;
+            color: #ffffff;
         }
-
-        header h1 {
-            font-size: 2.2rem;
-            font-weight: 800;
-            margin: 0 0 8px 0;
-            background: linear-gradient(to right, #34d399, #60a5fa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.05em;
+        .input-field:focus {
+            border-color: #2563eb;
+            outline: none;
         }
-
-        header p {
-            color: var(--text-muted);
-            margin: 0;
-            font-size: 1rem;
-        }
-
-        /* Responsive Grid Integration */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px;
-            margin-bottom: 24px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            padding: 24px;
-            border-radius: 16px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
-        }
-
-        .card h2 {
-            margin-top: 0;
-            font-size: 1rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 12px;
-            margin-bottom: 20px;
-        }
-
-        .status-display {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .status-val {
-            font-size: 2rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .sub-text {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            margin: 8px 0 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Component Badges */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 12px;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .bg-on { background-color: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-        .bg-off { background-color: rgba(148, 163, 184, 0.15); color: var(--text-muted); border: 1px solid rgba(148, 163, 184, 0.3); }
-        .bg-alert { background-color: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); animation: pulse 2s infinite; }
-        .bg-warn { background-color: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
-
-        /* Tables for Data Arrays */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            padding: 8px 4px;
-            text-align: left;
-            border-bottom: 1px solid var(--card-border);
-        }
-        td {
-            padding: 10px 4px;
-            font-size: 0.95rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-        }
-        .phase-r { color: #f87171; font-weight: 600; }
-        .phase-y { color: #fbbf24; font-weight: 600; }
-        .phase-b { color: #60a5fa; font-weight: 600; }
-
-        /* UI Control Items */
-        .data-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            font-size: 0.9rem;
-        }
-        .data-row:last-child { border: none; }
-        .data-label { color: var(--text-muted); }
-        .data-value { font-weight: 600; }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
-        }
+        
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
     </style>
 </head>
-<body>
+<body class="text-slate-200 min-h-screen flex justify-center items-center p-0 sm:p-4" x-data="sipConsoleApp()">
 
-<div class="container">
-    <header>
-        <h1>Smart Irrigation Control Center</h1>
-        <p>Real-Time Hardware Status & Monitoring Dashboard</p>
-    </header>
-
-    <!-- Top Row: Core Relays & Modes -->
-    <div class="grid">
-        <!-- Pump Control Status -->
-        <div class="card">
-            <h2>Pump Actuation Status</h2>
-            <div class="status-display">
-                <span class="data-label">Primary Station Pump</span>
-                <div id="mainPumpState"><span class="badge bg-off">OFF</span></div>
+    <div class="w-full max-w-md app-container min-h-screen sm:min-h-[840px] sm:h-[840px] sm:rounded-[40px] shadow-2xl relative flex flex-col overflow-hidden border border-slate-900">
+        
+        <!-- TOP DEVICE STATUS BAR -->
+        <header class="pt-3 px-6 pb-2 flex justify-between items-center text-xs font-semibold select-none text-white shrink-0">
+            <span class="font-mono text-xs" x-text="deviceTime">2:17</span>
+            <div class="flex items-center gap-1.5 text-[10px]">
+                <span>0.10 KB/s</span>
+                <span class="bg-slate-800 px-1 py-0.5 rounded text-[8px] font-bold text-cyan-400">5G+</span>
+                <span>📶🔋</span>
             </div>
-            <div class="status-display" style="margin-top: 15px;">
-                <span class="data-label">Fertigation Dosing Pump</span>
-                <div id="fertPumpState"><span class="badge bg-off">OFF</span></div>
+        </header>
+
+        <!-- APP NAVIGATION NODE BAR -->
+        <nav class="px-5 py-2 flex justify-between items-center shrink-0 border-b border-slate-900/60">
+            <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-blue-600 flex flex-col items-center justify-center gap-0.5 shadow-md">
+                    <div class="w-3.5 h-0.5 bg-white rounded-full"></div>
+                    <div class="w-3.5 h-0.5 bg-white rounded-full"></div>
+                    <div class="w-3.5 h-0.5 bg-white rounded-full"></div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-bold text-slate-400 tracking-wider uppercase leading-none">Node Monitor</span>
+                    <span class="text-base font-extrabold text-white tracking-tight mt-0.5">SIP-CONSOLE</span>
+                </div>
             </div>
-        </div>
 
-        <!-- Irrigation Fluid Paths & Backwash -->
-        <div class="card">
-            <h2>Flow Distributions</h2>
-            <div class="status-display">
-                <div class="status-val" id="activeZone" style="color: var(--secondary);">Loading...</div>
+            <div class="flex items-center gap-2">
+                <div class="px-2.5 py-1 rounded-full text-[9px] font-extrabold tracking-wider font-mono flex items-center gap-1.5 transition-all"
+                     :class="systemOnline ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'">
+                    <span class="w-1 h-1 rounded-full bg-current" :class="systemOnline && 'animate-pulse'"></span>
+                    <span x-text="systemOnline ? 'ONLINE NODE' : 'OFFLINE'"></span>
+                </div>
+                <button @click="toggleSystemPower()" class="w-7 h-7 rounded-lg panel-card flex items-center justify-center text-xs text-slate-400 hover:text-white transition-colors">
+                    🚪
+                </button>
             </div>
-            <div class="sub-text">Fertigation Target: <span id="activeFert" style="color: var(--purple); font-weight: bold;">None</span></div>
-            <div class="data-row" style="margin-top: 12px; border-top: 1px solid var(--card-border); padding-top: 10px;">
-                <span class="data-label">Backwash Filtration Mode</span>
-                <span id="backwashBadge" class="badge bg-off">Inactive</span>
-            </div>
-        </div>
+        </nav>
 
-        <!-- System Safety Metrics -->
-        <div class="card">
-            <h2>System Interlock Status</h2>
-            <div class="status-display">
-                <div id="interlockStatus"><span class="badge bg-on">SAFE</span></div>
-            </div>
-            <p class="sub-text" id="tripReason" style="font-weight: 500;">No system faults detected.</p>
-        </div>
-    </div>
-
-    <!-- Bottom Row: Scheduling, Metering, Diagnostics -->
-    <div class="grid">
-        <!-- Motor Protection Parameters -->
-        <div class="card">
-            <h2>Motor Protection & Power</h2>
-            <div class="data-row">
-                <span class="data-label">Dry Run Threshold Protection</span>
-                <span class="data-value" id="protDryRun" style="color: var(--warning);">Loading...</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Overload Trip Threshold</span>
-                <span class="data-value" id="protOverload" style="color: var(--danger);">Loading...</span>
-            </div>
-            <div class="data-row" style="margin-top: 8px;">
-                <span class="data-label">Aggregated System Power Load</span>
-                <span class="data-value"><span id="totalPower" style="color: var(--primary); font-size: 1.1rem;">0.00</span> kW</span>
-            </div>
-        </div>
-
-        <!-- Electrical Modbus Grid Telemetry -->
-        <div class="card">
-            <h2>3-Phase Power Meter (Modbus)</h2>
-            <table>
-                <thead>
-                    <tr><th>Phase Line</th><th>Potential</th><th>Draw Balance</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td class="phase-r">Phase R Line</td><td id="vR">0.0 V</td><td id="aR">0.0 A</td></tr>
-                    <tr><td class="phase-y">Phase Y Line</td><td id="vY">0.0 V</td><td id="aY">0.0 A</td></tr>
-                    <tr><td class="phase-b">Phase B Line</td><td id="vB">0.0 V</td><td id="aB">0.0 A</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Automation Calendars & Hardware Lifeline -->
-        <div class="card">
-            <h2>Automation Schedule & Link</h2>
-            <div class="data-row">
-                <span class="data-label">Active Program Target Time</span>
-                <span class="data-value" id="schedTime" style="color: var(--secondary);">Not Scheduled</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Active Program Runtime Remaining</span>
-                <span class="data-value" id="schedDuration">0 min</span>
-            </div>
-            <div class="status-display" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--card-border);">
-                <span class="sub-text">Signal: <span id="wifiSignal" style="font-weight: 600; color: var(--text-main);">📶 Loading...</span></span>
-                <span class="sub-text">Heartbeat: <span id="lastSeen" style="font-weight: 600; color: var(--text-main);">Never</span></span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    // FIX: Cleaned syntax config definition map 
-    const firebaseConfig = {
-        apiKey: "AIzaSyD6xT-wP2WeLB-ZRf2Yh9lPHvE6tpOK6Zo",
-        databaseURL: "https://smart-irrigation-2-393b4-default-rtdb.asia-southeast1.firebasedatabase.app"
-    };
-    
-    // Initialize Database References
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    // Stream live data entries directly from root /system structure node
-    database.ref('/system').on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
-
-        // 1. Line Voltage Matrix Engine
-        document.getElementById('vR').innerText = (data.voltageR !== undefined && data.voltageR >= 0) ? data.voltageR.toFixed(1) + " V" : "Fault";
-        document.getElementById('vY').innerText = (data.voltageY !== undefined && data.voltageY >= 0) ? data.voltageY.toFixed(1) + " V" : "Fault";
-        document.getElementById('vB').innerText = (data.voltageB !== undefined && data.voltageB >= 0) ? data.voltageB.toFixed(1) + " V" : "Fault";
-
-        // 2. Current Draw Ampere Calculations
-        document.getElementById('aR').innerText = (data.currentR !== undefined && data.currentR >= 0) ? data.currentR.toFixed(1) + " A" : "0.0 A";
-        document.getElementById('aY').innerText = (data.currentY !== undefined && data.currentY >= 0) ? data.currentY.toFixed(1) + " A" : "0.0 A";
-        document.getElementById('aB').innerText = (data.currentB !== undefined && data.currentB >= 0) ? data.currentB.toFixed(1) + " A" : "0.0 A";
-
-        // 3. Accumulated Power Engine
-        document.getElementById('totalPower').innerText = data.power ? (data.power / 1000).toFixed(2) : "0.00";
-
-        // 4. Actuator Relays (Primary & Dosing Pumps)
-        document.getElementById('mainPumpState').innerHTML = data.pump1Active ? 
-            '<span class="badge bg-on">RUNNING</span>' : '<span class="badge bg-off">OFF</span>';
-
-        if(data.fertPumpActive) {
-            document.getElementById('fertPumpState').innerHTML = '<span class="badge bg-on">RUNNING</span>';
-        } else {
-            document.getElementById('fertPumpState').innerHTML = '<span class="badge bg-off">OFF</span>';
-        }
-
-        // 5. Backwash State and Active Irrigation Zones Parsing
-        if(data.isBackwashActive) {
-            document.getElementById('activeZone').innerText = "Backwash Active";
-            document.getElementById('activeZone').style.color = "var(--warning)";
-            document.getElementById('backwashBadge').className = "badge bg-alert";
-            document.getElementById('backwashBadge').innerText = "Flushing";
-        } else {
-            document.getElementById('backwashBadge').className = "badge bg-off";
-            document.getElementById('backwashBadge').innerText = "Inactive";
+        <!-- DYNAMIC CONFIGURATION/MONITORING MAIN CORE -->
+        <div class="flex-1 overflow-y-auto custom-scroll pb-24 relative">
             
-            if(data.activeIrrZone && data.activeIrrZone > 0) {
-                document.getElementById('activeZone').innerText = "Zone " + data.activeIrrZone;
-                document.getElementById('activeZone').style.color = "var(--primary)";
-            } else {
-                document.getElementById('activeZone').innerText = "Standby (No Active Zone)";
-                document.getElementById('activeZone').style.color = "var(--text-muted)";
+            <!-- MAIN VIEW SCREEN -->
+            <div x-show="currentView === 'dashboard'" class="p-4 space-y-4" x-transition.opacity>
+                
+                <!-- SYSTEM MAIN METRICS ENGINE -->
+                <section class="panel-card rounded-2xl p-4 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="text-[9px] font-mono tracking-widest text-slate-400 uppercase font-bold block">System Status</span>
+                            <h2 class="text-xl font-black tracking-tight text-white mt-0.5" x-text="currentSystemState">STANDBY</h2>
+                        </div>
+                        <span class="text-[10px] font-mono font-bold text-slate-400" x-text="liveClockStamp">14:17:29</span>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed font-medium" x-text="statusSubtitleText">Awaiting schedule execution.</p>
+                    
+                    <div class="flex gap-4 pt-1 text-xs font-bold text-slate-300">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-blue-400">🌊</span> Main Pump: <span :class="mainPumpActive ? 'text-emerald-400':'text-slate-400'" x-text="mainPumpActive ? 'ON' : 'OFF'">OFF</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-cyan-400">🧪</span> Fert Pump: <span :class="fertPumpActive ? 'text-cyan-400':'text-slate-400'" x-text="fertPumpActive ? 'ON' : 'OFF'">OFF</span>
+                        </div>
+                    </div>
+
+                    <!-- 3-PHASE RYB ELECTRICAL TELEMETRY SYSTEM -->
+                    <div class="space-y-2 pt-3 border-t border-slate-800/60 font-mono">
+                        <span class="text-[9px] uppercase font-bold tracking-wider text-slate-500 block">⚡ 3-Phase Power System (RYB)</span>
+                        
+                        <div class="grid grid-cols-3 gap-2">
+                            <!-- R-PHASE DATA -->
+                            <div class="input-field p-2 rounded-xl flex flex-col justify-center border-l-2 border-rose-500">
+                                <span class="text-[8px] font-bold text-rose-400">🔴 R-PHASE</span>
+                                <span class="text-xs font-bold mt-1 text-white" x-text="systemOnline ? telemetryRYB.vR + 'V' : '---'"></span>
+                                <span class="text-[9px] text-slate-400 mt-0.5" x-text="systemOnline ? telemetryRYB.cR + 'A' : '-- A'"></span>
+                            </div>
+                            <!-- Y-PHASE DATA -->
+                            <div class="input-field p-2 rounded-xl flex flex-col justify-center border-l-2 border-amber-400">
+                                <span class="text-[8px] font-bold text-amber-400">🟡 Y-PHASE</span>
+                                <span class="text-xs font-bold mt-1 text-white" x-text="systemOnline ? telemetryRYB.vY + 'V' : '---'"></span>
+                                <span class="text-[9px] text-slate-500 mt-0.5">Balanced</span>
+                            </div>
+                            <!-- B-PHASE DATA -->
+                            <div class="input-field p-2 rounded-xl flex flex-col justify-center border-l-2 border-blue-500">
+                                <span class="text-[8px] font-bold text-blue-400">🔵 B-PHASE</span>
+                                <span class="text-xs font-bold mt-1 text-white" x-text="systemOnline ? telemetryRYB.vB + 'V' : '---'"></span>
+                                <span class="text-[9px] text-slate-500 mt-0.5">Balanced</span>
+                            </div>
+                        </div>
+
+                        <!-- SYSTEM CONSUMPTION LOAD RUN RATE -->
+                        <div class="bg-slate-950/40 p-2 rounded-xl flex justify-between items-center text-xs text-slate-400 border border-slate-900">
+                            <span>TOTAL COMPUTED POWER LOAD:</span>
+                            <span class="font-bold text-emerald-400" x-text="systemOnline ? powerReadout + ' W' : '-- W'">0 W</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ENVIRONMENT CONDITIONS STATUS PANEL -->
+                <section class="panel-card rounded-2xl p-4 flex items-center justify-between relative overflow-hidden">
+                    <div class="space-y-1">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-3xl font-black text-white tracking-tight">30°C</span>
+                            <span class="text-xs font-semibold text-slate-400">Wind: 18.3 Km/h</span>
+                        </div>
+                        <div class="text-[10px] font-bold tracking-wider text-slate-400 uppercase flex items-center gap-1">📍 PAZHAYANNŪR, INDIA ✒️</div>
+                    </div>
+                    <div class="text-3xl filter drop-shadow-md">🌤️</div>
+                </section>
+
+                <!-- IRRIGATION FLOW CONTROL GRID (10 ZONES) -->
+                <section class="space-y-2">
+                    <h3 class="text-[11px] font-black tracking-widest text-slate-400 font-mono uppercase">Irrigation Zones (1-10)</h3>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <template x-for="z in 10" :key="'zone-'+z">
+                            <div class="panel-card p-3 rounded-xl flex flex-col justify-between h-20 relative cursor-pointer group transition-all"
+                                 :class="activeLiveZone === z && 'border-emerald-500 bg-emerald-950/10'"
+                                 @click="triggerManualOverrideZoneModal(z)">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-base" :class="activeLiveZone === z ? 'text-emerald-400' : 'text-slate-500'">💧</span>
+                                    <label class="relative inline-flex items-center cursor-pointer" @click.stop>
+                                        <input type="checkbox" :checked="activeLiveZone === z" @change="toggleZoneDirectly(z, $event.target.checked)" class="sr-only peer">
+                                        <div class="w-7 h-4 bg-slate-800 rounded-full peer-checked:bg-emerald-500 transition-colors flex items-center px-0.5">
+                                            <div class="w-3 h-3 bg-white rounded-full transition-transform" :class="activeLiveZone === z && 'translate-x-3'"></div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-white" x-text="'Zone ' + z"></h4>
+                                    <span class="text-[10px] font-mono font-bold uppercase transition-colors"
+                                          :class="activeLiveZone === z ? 'text-emerald-400' : 'text-slate-500'" 
+                                          x-text="activeLiveZone === z ? 'RUNNING' : 'STANDBY'"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+                <!-- DOSING FERTILIZATION DISTRIBUTION CONTROLLERS (6 SYSTEM ENGINES) -->
+                <section class="space-y-2">
+                    <h3 class="text-[11px] font-black tracking-widest text-slate-400 font-mono uppercase">Fertilizer Compartments (1-6)</h3>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <template x-for="c in 6" :key="'comp-'+c">
+                            <div class="panel-card p-3 rounded-xl flex flex-col justify-between h-20 relative transition-all"
+                                 :class="activeLiveCompartment === c ? 'border-cyan-500 bg-cyan-950/10' : (!mainPumpActive && 'opacity-40')">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-base" :class="activeLiveCompartment === c ? 'text-cyan-400' : 'text-slate-600'">🧪</span>
+                                    <label class="relative inline-flex items-center cursor-pointer" @click.stop>
+                                        <input type="checkbox" :disabled="!mainPumpActive" :checked="activeLiveCompartment === c" @change="toggleCompartmentDirectly(c, $event.target.checked)" class="sr-only peer">
+                                        <div class="w-7 h-4 bg-slate-800 rounded-full peer-checked:bg-cyan-500 transition-colors flex items-center px-0.5">
+                                            <div class="w-3 h-3 bg-white rounded-full transition-transform" :class="activeLiveCompartment === c && 'translate-x-3'"></div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-white" x-text="'Compartment ' + c"></h4>
+                                    <span class="text-[10px] font-mono font-bold uppercase transition-colors"
+                                          :class="activeLiveCompartment === c ? 'text-cyan-400' : 'text-slate-500'"
+                                          x-text="activeLiveCompartment === c ? 'INJECTING' : 'DISABLED'"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+            </div>
+
+            <!-- BACKSTAGE INFRASTRUCTURE CONFIGURATIONS PANEL -->
+            <div x-show="currentView === 'config'" class="p-4 space-y-4" x-transition.opacity>
+                
+                <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                    <h2 class="text-base font-black text-white">Automations & Config</h2>
+                    <button @click="currentView = 'dashboard'" class="px-3 py-1 bg-slate-800 text-slate-200 rounded-lg text-xs font-bold font-mono">Done</button>
+                </div>
+
+                <!-- HARDWARE FLUSH BACKWASH PARAMETERS -->
+                <section class="panel-card rounded-2xl p-4 space-y-3 border border-purple-900/30">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-1.5 text-purple-400 font-bold text-xs font-mono uppercase">
+                            <span>♻️</span> Backwash (Flush) Configuration
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" x-model="backwashConfig.enabled" class="sr-only peer">
+                            <div class="w-8 h-4 bg-slate-800 rounded-full peer-checked:bg-purple-500 transition-colors flex items-center px-0.5">
+                                <div class="w-3 h-3 bg-white rounded-full transition-transform" :class="backwashConfig.enabled && 'translate-x-4'"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="space-y-3 text-xs" :class="!backwashConfig.enabled && 'opacity-30 pointer-events-none'">
+                        <div class="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-slate-400 font-medium">Run Time</span>
+                            <input type="time" x-model="backwashConfig.runTime" class="input-field rounded-lg px-2 py-1 font-bold text-center text-xs">
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-slate-400 font-medium">Duration (Mins)</span>
+                            <input type="number" x-model.number="backwashConfig.duration" class="w-16 input-field rounded-lg p-1 font-bold text-center text-xs">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <span class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Execution Days:</span>
+                            <div class="flex flex-wrap gap-1.5">
+                                <template x-for="day in ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']">
+                                    <button @click="toggleBackwashDay(day)"
+                                            class="px-2.5 py-1.5 rounded-lg border text-[10px] font-bold transition-all"
+                                            :class="backwashConfig.days.includes(day) ? 'bg-purple-600/20 border-purple-500 text-purple-300' : 'bg-slate-900 border-slate-800 text-slate-400'"
+                                            x-text="day"></button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    <button @click="commitBackwashChanges()" class="w-full py-2 bg-purple-600 hover:bg-purple-500 font-bold text-xs tracking-wider rounded-xl text-white transition-colors">💾 Save Backwash Settings</button>
+                </section>
+
+                <!-- HARDWARE SAFETY GUARD PROTECTION PROFILES -->
+                <section class="panel-card rounded-2xl p-4 space-y-3 border border-amber-900/30">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-1.5 text-amber-500 font-bold text-xs font-mono uppercase">
+                            <span>🛡️</span> Motor Protection Limits
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" x-model="hardwareSafety.enabled" class="sr-only peer">
+                            <div class="w-8 h-4 bg-slate-800 rounded-full peer-checked:bg-amber-500 transition-colors flex items-center px-0.5">
+                                <div class="w-3 h-3 bg-white rounded-full transition-transform" :class="hardwareSafety.enabled && 'translate-x-4'"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="space-y-3 text-xs font-mono" :class="!hardwareSafety.enabled && 'opacity-30 pointer-events-none'">
+                        <div class="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-slate-400 font-medium">Voltage Thresholds (V)</span>
+                            <div class="flex items-center gap-1">
+                                <input type="number" x-model.number="hardwareSafety.vMin" class="w-14 input-field rounded-lg p-1 text-center text-xs">
+                                <span class="text-slate-600">-</span>
+                                <input type="number" x-model.number="hardwareSafety.vMax" class="w-14 input-field rounded-lg p-1 text-center text-xs">
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-slate-400 font-medium">Max Phase Current (A)</span>
+                            <div class="flex items-center gap-1">
+                                <input type="number" step="0.1" x-model.number="hardwareSafety.cMax" class="w-14 input-field rounded-lg p-1 text-center text-xs">
+                            </div>
+                        </div>
+                    </div>
+                    <button @click="commitSafetyLimits()" class="w-full py-2 bg-amber-600 hover:bg-amber-500 font-bold text-xs tracking-wider rounded-xl text-white transition-colors">💾 Save Limits</button>
+                </section>
+
+                <!-- AUTOMATED AGRI SCHEDULING INTERFACES -->
+                <section class="space-y-2">
+                    <h3 class="text-[11px] font-black tracking-widest text-slate-400 font-mono uppercase">Watering Schedules</h3>
+                    
+                    <div class="space-y-2">
+                        <template x-for="(sched, index) in globalSchedules" :key="'sched-'+index">
+                            <div class="panel-card p-4 rounded-2xl relative border-l-4 border-blue-500 space-y-3">
+                                <div class="flex justify-between items-start">
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5 font-mono text-base font-bold text-white">
+                                            <span>⏱️</span> <span x-text="sched.times.join(' | ')">22:32</span>
+                                        </div>
+                                        <div class="text-[10px] font-medium text-slate-400">DAYS: <span class="text-slate-300 font-bold" x-text="sched.days.join(', ')"></span></div>
+                                        <div class="text-[10px] font-bold">STATUS: <span :class="sched.active ? 'text-emerald-400':'text-slate-500'" x-text="sched.active ? 'ACTIVE':'DISABLED'">ACTIVE</span></div>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" x-model="sched.active" class="sr-only peer">
+                                        <div class="w-8 h-4 bg-slate-800 rounded-full peer-checked:bg-blue-500 transition-colors flex items-center px-0.5">
+                                            <div class="w-3 h-3 bg-white rounded-full transition-transform" :class="sched.active && 'translate-x-4'"></div>
+                                        </div>
+                                    </label>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/40 text-[10px] font-mono">
+                                    <button @click="openSchedulerWizardForModification(index)" class="py-1.5 rounded-lg bg-blue-950/40 text-blue-400 border border-blue-900/30 font-bold">📝 Edit Matrix</button>
+                                    <button @click="purgeScheduleBlock(index)" class="py-1.5 rounded-lg bg-rose-950/40 text-rose-400 border border-rose-900/30 font-bold">🗑️ Delete</button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <button @click="openSchedulerWizardForModification(null)" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 font-bold text-xs tracking-widest uppercase rounded-2xl text-white transition-colors shadow-lg flex items-center justify-center gap-2 mt-4">
+                        <span>+</span> Create New Matrix Profile
+                    </button>
+                </section>
+            </div>
+        </div>
+
+        <!-- MATRIX INITIALIZATION BUILDER WIZARD -->
+        <div x-show="currentView === 'wizard'" class="absolute inset-0 bg-[#0b1324] z-50 flex flex-col" x-transition.opacity>
+            <header class="px-5 py-4 flex justify-between items-center border-b border-slate-900 shrink-0">
+                <h2 class="text-base font-black text-white">Modify Automation Matrix</h2>
+                <button @click="currentView = 'config'" class="px-3 py-1 bg-slate-800 text-slate-200 rounded-lg text-xs font-bold">Cancel</button>
+            </header>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scroll pb-10">
+                <div class="panel-card p-4 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[11px] font-black tracking-wider text-slate-400 uppercase font-mono">Start Times (Max 5)</label>
+                        <button @click="addNewTimeFieldToWizard()" class="px-2 py-1 bg-blue-600/20 text-blue-400 border border-blue-500/20 rounded-lg text-[10px] font-bold">+ Add Time</button>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <template x-for="(t, idx) in wizardModel.times" :key="'time-'+idx">
+                            <div class="flex items-center gap-2">
+                                <input type="time" x-model="wizardModel.times[idx]" class="flex-1 input-field rounded-xl p-2.5 font-bold font-mono text-center text-sm">
+                                <button @click="wizardModel.times.splice(idx, 1)" class="w-10 h-10 rounded-xl bg-rose-950/40 border border-rose-900/30 text-rose-400 font-bold flex items-center justify-center">✕</button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="panel-card p-4 rounded-2xl space-y-2">
+                    <label class="text-[11px] font-black tracking-wider text-slate-400 uppercase font-mono block">Watering Days</label>
+                    <div class="flex flex-wrap gap-1.5">
+                        <template x-for="day in ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']">
+                            <button @click="toggleWizardDaySelector(day)"
+                                    class="px-3 py-2 rounded-xl border text-xs font-bold transition-all"
+                                    :class="wizardModel.days.includes(day) ? 'bg-blue-600 border-blue-500 text-white' : 'bg-slate-900 border-slate-800 text-slate-400'"
+                                    x-text="day"></button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- 10 ZONE AND 6 COMPARTMENT STEP MATRIX CONFIGURATION MAPPER -->
+                <div class="space-y-2">
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-black tracking-wider text-slate-400 uppercase font-mono block">Zone & Fertilizer Integration Grid</label>
+                        <p class="text-[11px] text-slate-400 leading-tight">Map absolute sequence duration matrix across 10 output zones and 6 fertilizer compartments.</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <template x-for="z in 10" :key="'wiz-zone-'+z">
+                            <div class="panel-card p-4 rounded-2xl space-y-3 border-l-2 border-emerald-500">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-black text-white flex items-center gap-1">💧 Zone <span x-text="z"></span> Matrix</span>
+                                </div>
+                                
+                                <div class="flex justify-between items-center bg-slate-950/40 p-2 rounded-xl border border-slate-800 text-xs">
+                                    <span class="text-slate-400 font-medium">Water Duration</span>
+                                    <div class="flex items-center gap-1.5">
+                                        <input type="number" x-model.number="wizardModel.zoneDurations[z]" class="w-14 input-field rounded-lg p-1.5 text-center font-bold">
+                                        <span class="text-slate-500 font-mono">mins</span>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2 pl-3 border-l border-slate-800">
+                                    <template x-for="(inj, iIdx) in wizardModel.fertilizerInjections.filter(i => i.zone === z)" :key="'inj-'+iIdx">
+                                        <div class="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80 text-xs space-y-2 relative">
+                                            <div class="flex justify-between items-center">
+                                                <select x-model.number="inj.compartment" class="input-field rounded-lg px-2 py-1 text-[11px] font-bold">
+                                                    <option :value="1">Comp 1</option>
+                                                    <option :value="2">Comp 2</option>
+                                                    <option :value="3">Comp 3</option>
+                                                    <option :value="4">Comp 4</option>
+                                                    <option :value="5">Comp 5</option>
+                                                    <option :value="6">Comp 6</option>
+                                                </select>
+                                                <input type="time" x-model="inj.startTime" class="input-field rounded-lg px-2 py-0.5 font-mono text-center text-[11px]">
+                                                <button @click="wizardModel.fertilizerInjections = wizardModel.fertilizerInjections.filter(item => item !== inj)" class="text-rose-400 font-bold px-1">✕</button>
+                                            </div>
+                                            <div class="flex justify-between items-center text-[11px]">
+                                                <span class="text-slate-500 font-medium">Dosing Duration</span>
+                                                <div class="flex items-center gap-1">
+                                                    <input type="number" x-model.number="inj.duration" class="w-12 input-field rounded-lg p-0.5 text-center font-bold">
+                                                    <span class="text-slate-500">mins</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    
+                                    <button @click="addFertilizerInjectionToZone(z)" class="w-full py-2 border border-dashed border-slate-700 hover:border-slate-500 rounded-xl text-[11px] font-bold text-slate-400 flex items-center justify-center gap-1 transition-colors">
+                                        <span>+</span> Link Fertilizer Compartment
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="p-4 bg-slate-900/40 border-t border-slate-800 shrink-0">
+                <button @click="saveWizardStateToGlobalSchedules()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 font-black text-xs tracking-wider uppercase rounded-xl text-white transition-colors">
+                    ✔️ Save Grid Schedule
+                </button>
+            </footer>
+        </div>
+
+        <!-- ZONE OVERRIDE DURATIONS MANIFESTATION DIALOG -->
+        <div x-show="overrideModal.show" x-transition.opacity class="fixed inset-0 bg-slate-950/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+            <div class="panel-card w-full max-w-xs p-5 rounded-2xl space-y-4 border border-slate-700/30" @click.away="overrideModal.show = false">
+                <div class="text-center">
+                    <h3 class="text-sm font-black text-white uppercase tracking-wider">Manual Overpass Zone <span x-text="overrideModal.zoneId"></span></h3>
+                    <p class="text-[11px] text-slate-400 mt-1">Forced run duration window (minutes).</p>
+                </div>
+                <div>
+                    <input type="number" x-model.number="overrideModal.duration" class="w-full input-field rounded-xl p-3 font-mono font-bold text-center text-lg">
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs font-bold font-mono">
+                    <button @click="overrideModal.show = false" class="w-full py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 uppercase text-[10px]">Cancel</button>
+                    <button @click="commitZoneManualOverride()" class="w-full py-2.5 rounded-xl bg-blue-600 text-white uppercase text-[10px]">Deploy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTROL PANEL FOOTER MODULES BAR -->
+        <footer class="glass-card absolute bottom-0 left-0 right-0 z-40 p-3 flex gap-2 border-t border-slate-900 bg-[#070e1c]/90 backdrop-blur-md shrink-0">
+            <button @click="currentView = (currentView === 'dashboard' ? 'config' : 'dashboard')" 
+                    class="flex-1 bg-white font-black text-xs text-slate-950 py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 tracking-wider uppercase shadow-md active:scale-[0.99] transition-all">
+                🎛️ <span x-text="currentView === 'dashboard' ? 'Automations & Settings' : 'Back to Dashboard'">Automations & Settings</span>
+            </button>
+            <button @click="triggerEmergencyShutdownShutoff()" 
+                    class="bg-rose-600/10 border border-rose-500/30 hover:bg-rose-600 text-rose-500 hover:text-white px-4 rounded-xl font-bold flex items-center justify-center transition-all active:scale-[0.96]">
+                🛑
+            </button>
+        </footer>
+    </div>
+
+    <!-- ENGINE CONTROL SCRIPTS AND PROCESSORS -->
+    <script>
+        function sipConsoleApp() {
+            return {
+                deviceTime: '02:17',
+                liveClockStamp: '14:17:22',
+                systemOnline: true,
+                currentView: 'dashboard', 
+                
+                currentSystemState: 'STANDBY',
+                statusSubtitleText: 'Awaiting schedule execution.',
+                mainPumpActive: false,
+                fertPumpActive: false,
+                activeLiveZone: 0,
+                activeLiveCompartment: 0,
+
+                // UPDATED: 3-Phase RYB Framework and Power Calculations
+                telemetryRYB: {
+                    vR: 230, vY: 231, vB: 229,
+                    cR: 0.0
+                },
+                powerReadout: 0,
+
+                backwashConfig: {
+                    enabled: false,
+                    runTime: '13:05',
+                    duration: 1,
+                    days: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+                },
+
+                hardwareSafety: {
+                    enabled: true,
+                    vMin: 180,
+                    vMax: 260,
+                    cMax: 16
+                },
+
+                // UPDATED: Global Storage Arrays handling updated matrix counts (10 zones)
+                globalSchedules: [
+                    {
+                        times: ['22:32', '06:00'],
+                        days: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+                        active: true,
+                        zoneDurations: { 1: 3, 2: 1, 3: 2, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 },
+                        fertilizerInjections: [
+                            { zone: 1, compartment: 1, startTime: '22:33', duration: 1 },
+                            { zone: 3, compartment: 5, startTime: '06:05', duration: 2 }
+                        ]
+                    }
+                ],
+
+                overrideModal: { show: false, zoneId: 0, duration: 10 },
+                wizardModel: { index: null, times: [], days: [], zoneDurations: {}, fertilizerInjections: [] },
+
+                init() {
+                    this.refreshHardwareProcessorClock();
+                    setInterval(() => this.refreshHardwareProcessorClock(), 1000);
+                },
+
+                refreshHardwareProcessorClock() {
+                    const now = new Date();
+                    this.deviceTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    this.liveClockStamp = now.toLocaleTimeString('en-US', { hour12: false });
+
+                    if (!this.systemOnline) return;
+
+                    const curHHMM = now.toTimeString().substring(0, 5);
+                    const daysLookup = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                    const currentDayStr = daysLookup[now.getDay()];
+
+                    // 1. Process Backwash Rule Blocks
+                    if (this.backwashConfig.enabled && this.backwashConfig.days.includes(currentDayStr)) {
+                        if (this.isCurrentTimeInsideWindow(curHHMM, this.backwashConfig.runTime, this.backwashConfig.duration)) {
+                            this.currentSystemState = 'BACKWASHING';
+                            this.statusSubtitleText = 'Terminal system flush protocol active.';
+                            this.mainPumpActive = true;
+                            this.fertPumpActive = false;
+                            this.activeLiveZone = 10; // Flushes using boundary terminal zone 10
+                            this.activeLiveCompartment = 0;
+                            this.computeElectricalTelemetryFields(true, false);
+                            return;
+                        }
+                    }
+
+                    // 2. Scan Matrix Automation Pipeline Schedules
+                    let matchFound = false;
+                    for (let sched of this.globalSchedules) {
+                        if (!sched.active || !sched.days.includes(currentDayStr)) continue;
+
+                        for (let startTime of sched.times) {
+                            if (this.isCurrentTimeInsideWindow(curHHMM, startTime, this.calculateTotalScheduleDuration(sched))) {
+                                matchFound = true;
+                                this.executeProfileMatrix(sched, startTime, curHHMM);
+                                break;
+                            }
+                        }
+                        if (matchFound) break;
+                    }
+
+                    // 3. System Standby Fallback Loop State
+                    if (!matchFound && this.currentSystemState !== 'MANUAL OVERRIDE') {
+                        this.currentSystemState = 'STANDBY';
+                        this.statusSubtitleText = 'Awaiting schedule execution.';
+                        this.mainPumpActive = false;
+                        this.fertPumpActive = false;
+                        this.activeLiveZone = 0;
+                        this.activeLiveCompartment = 0;
+                        this.computeElectricalTelemetryFields(false, false);
+                    }
+                },
+
+                isCurrentTimeInsideWindow(current, start, durationMins) {
+                    if (!start) return false;
+                    const [sH, sM] = start.split(':').map(Number);
+                    const [cH, cM] = current.split(':').map(Number);
+                    
+                    const startAbsoluteMins = sH * 60 + sM;
+                    const currentAbsoluteMins = cH * 60 + cM;
+                    const endAbsoluteMins = startAbsoluteMins + durationMins;
+                    
+                    return currentAbsoluteMins >= startAbsoluteMins && currentAbsoluteMins < endAbsoluteMins;
+                },
+
+                calculateTotalScheduleDuration(sched) {
+                    let total = 0;
+                    for (let key in sched.zoneDurations) {
+                        total += (sched.zoneDurations[key] || 0);
+                    }
+                    return total || 1; 
+                },
+
+                executeProfileMatrix(sched, profileStartTime, currentHHMM) {
+                    const [sH, sM] = profileStartTime.split(':').map(Number);
+                    const [cH, cM] = currentHHMM.split(':').map(Number);
+                    
+                    const startAbs = sH * 60 + sM;
+                    const curAbs = cH * 60 + cM;
+                    let runningOffset = startAbs;
+
+                    this.currentSystemState = 'AUTOMATION ACTIVE';
+                    this.statusSubtitleText = 'Running active system profile grid calculations.';
+
+                    let evaluatedZone = 0;
+                    for (let z = 1; z <= 10; z++) {
+                        const duration = sched.zoneDurations[z] || 0;
+                        if (duration > 0) {
+                            if (curAbs >= runningOffset && curAbs < (runningOffset + duration)) {
+                                evaluatedZone = z;
+                                break;
+                            }
+                            runningOffset += duration;
+                        }
+                    }
+
+                    this.activeLiveZone = evaluatedZone;
+                    this.mainPumpActive = evaluatedZone > 0;
+
+                    let evaluatedCompartment = 0;
+                    if (this.mainPumpActive) {
+                        for (let inj of sched.fertilizerInjections) {
+                            if (inj.zone === evaluatedZone) {
+                                if (this.isCurrentTimeInsideWindow(currentHHMM, inj.startTime, inj.duration)) {
+                                    evaluatedCompartment = inj.compartment;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    this.activeLiveCompartment = evaluatedCompartment;
+                    this.fertPumpActive = evaluatedCompartment > 0;
+                    this.computeElectricalTelemetryFields(this.mainPumpActive, this.fertPumpActive);
+                },
+
+                // UPDATED: Compute RYB phase electrical arrays and compound total load variables
+                computeElectricalTelemetryFields(pump, fert) {
+                    if (!this.systemOnline) {
+                        this.telemetryRYB.cR = '0.0';
+                        this.powerReadout = 0;
+                        return;
+                    }
+                    
+                    // Emulated variance mapping across 3 separate transformer feeds
+                    this.telemetryRYB.vR = Math.floor(228 + Math.random() * 5);
+                    this.telemetryRYB.vY = Math.floor(229 + Math.random() * 4);
+                    this.telemetryRYB.vB = Math.floor(227 + Math.random() * 6);
+
+                    if (pump && fert) {
+                        this.telemetryRYB.cR = (6.2 + Math.random() * 0.5).toFixed(2);
+                    } else if (pump) {
+                        this.telemetryRYB.cR = (4.1 + Math.random() * 0.3).toFixed(2);
+                    } else {
+                        this.telemetryRYB.cR = '0.0';
+                    }
+
+                    // True total power computed using active phase current draw across balanced load matrices
+                    const currentVal = parseFloat(this.telemetryRYB.cR);
+                    this.powerReadout = Math.round(currentVal * this.telemetryRYB.vR * 1.732); // 3-Phase power equation calculation model
+                },
+
+                toggleZoneDirectly(zoneId, status) {
+                    if (status) {
+                        this.currentSystemState = 'MANUAL OVERRIDE';
+                        this.statusSubtitleText = `Forced loop manual trigger bypass engaged on Zone ${zoneId}.`;
+                        this.activeLiveZone = zoneId;
+                        this.mainPumpActive = true;
+                    } else {
+                        this.currentSystemState = 'STANDBY';
+                        this.activeLiveZone = 0;
+                        this.mainPumpActive = false;
+                        this.activeLiveCompartment = 0;
+                        this.fertPumpActive = false;
+                    }
+                    this.computeElectricalTelemetryFields(this.mainPumpActive, this.fertPumpActive);
+                },
+
+                toggleCompartmentDirectly(compId, status) {
+                    if (!this.mainPumpActive) return;
+                    if (status) {
+                        this.activeLiveCompartment = compId;
+                        this.fertPumpActive = true;
+                    } else {
+                        this.activeLiveCompartment = 0;
+                        this.fertPumpActive = false;
+                    }
+                    this.computeElectricalTelemetryFields(this.mainPumpActive, this.fertPumpActive);
+                },
+
+                triggerManualOverrideZoneModal(zoneId) {
+                    this.overrideModal.zoneId = zoneId;
+                    this.overrideModal.duration = 10;
+                    this.overrideModal.show = true;
+                },
+
+                commitZoneManualOverride() {
+                    this.overrideModal.show = false;
+                    this.toggleZoneDirectly(this.overrideModal.zoneId, true);
+                },
+
+                commitBackwashChanges() {
+                    alert("System Backwash settings successfully updated.");
+                },
+
+                commitSafetyLimits() {
+                    alert("Motor hardware safety profiles written onto flash memory storage parameters.");
+                },
+
+                toggleBackwashDay(day) {
+                    if (this.backwashConfig.days.includes(day)) {
+                        this.backwashConfig.days = this.backwashConfig.days.filter(d => d !== day);
+                    } else {
+                        this.backwashConfig.days.push(day);
+                    }
+                },
+
+                openSchedulerWizardForModification(targetIndex) {
+                    this.wizardModel.index = targetIndex;
+                    
+                    if (targetIndex !== null) {
+                        const reference = this.globalSchedules[targetIndex];
+                        this.wizardModel.times = [...reference.times];
+                        this.wizardModel.days = [...reference.days];
+                        this.wizardModel.zoneDurations = { ...reference.zoneDurations };
+                        this.wizardModel.fertilizerInjections = JSON.parse(JSON.stringify(reference.fertilizerInjections));
+                    } else {
+                        this.wizardModel.times = ['06:00'];
+                        this.wizardModel.days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                        // Initialize all 10 zones inside builder model block definitions
+                        this.wizardModel.zoneDurations = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 };
+                        this.wizardModel.fertilizerInjections = [];
+                    }
+                    this.currentView = 'wizard';
+                },
+
+                addNewTimeFieldToWizard() {
+                    if (this.wizardModel.times.length < 5) {
+                        this.wizardModel.times.push('12:00');
+                    }
+                },
+
+                toggleWizardDaySelector(day) {
+                    if (this.wizardModel.days.includes(day)) {
+                        this.wizardModel.days = this.wizardModel.days.filter(d => d !== day);
+                    } else {
+                        this.wizardModel.days.push(day);
+                    }
+                },
+
+                addFertilizerInjectionToZone(zoneId) {
+                    this.wizardModel.fertilizerInjections.push({
+                        zone: zoneId,
+                        compartment: 1, // Defaulting initialization layer
+                        startTime: '06:01',
+                        duration: 1
+                    });
+                },
+
+                saveWizardStateToGlobalSchedules() {
+                    const profileData = {
+                        times: this.wizardModel.times.filter(t => t),
+                        days: this.wizardModel.days,
+                        active: true,
+                        zoneDurations: { ...this.wizardModel.zoneDurations },
+                        fertilizerInjections: JSON.parse(JSON.stringify(this.wizardModel.fertilizerInjections))
+                    };
+
+                    if (this.wizardModel.index !== null) {
+                        this.globalSchedules[this.wizardModel.index] = profileData;
+                    } else {
+                        this.globalSchedules.push(profileData);
+                    }
+                    
+                    this.currentView = 'config';
+                },
+
+                purgeScheduleBlock(index) {
+                    this.globalSchedules.splice(index, 1);
+                },
+
+                toggleSystemPower() {
+                    this.systemOnline = !this.systemOnline;
+                    if (!this.systemOnline) {
+                        this.mainPumpActive = false;
+                        this.fertPumpActive = false;
+                        this.activeLiveZone = 0;
+                        this.activeLiveCompartment = 0;
+                        this.computeElectricalTelemetryFields(false, false);
+                    }
+                },
+
+                triggerEmergencyShutdownShutoff() {
+                    this.mainPumpActive = false;
+                    this.fertPumpActive = false;
+                    this.activeLiveZone = 0;
+                    this.activeLiveCompartment = 0;
+                    this.currentSystemState = 'STANDBY';
+                    this.globalSchedules.forEach(s => s.active = false);
+                    this.computeElectricalTelemetryFields(false, false);
+                    alert("🚨 EMERGENCY SYSTEM OVERRIDE: Connection severed completely. Automation maps and structural grids are now safely locked out.");
+                }
             }
         }
-
-        // 6. Fertigation Compartment Target Assignments
-        if(data.activeFertZone && data.activeFertZone > 0) {
-            document.getElementById('activeFert').innerText = "Tank Compartment " + data.activeFertZone;
-            document.getElementById('activeFert').style.color = "var(--purple)";
-        } else {
-            document.getElementById('activeFert').innerText = "None";
-            document.getElementById('activeFert').style.color = "var(--text-muted)";
-        }
-
-        // 7. Motor Fault Detection & Diagnostic Interlocks
-        if(data.interlockReason && data.interlockReason > 0) {
-            document.getElementById('interlockStatus').innerHTML = '<span class="badge bg-alert">PAUSED</span>';
-            let reasonText = "Hardware Fault Halt Interlock Activated";
-            if(data.interlockReason == 1) reasonText = "⚠️ Volumetric Phase Error (High/Low Voltage Spike)";
-            if(data.interlockReason == 2) reasonText = "⚠️ Dry Run Fault Interrupted (Critical Low Current)";
-            if(data.interlockReason == 3) reasonText = "⚠️ Motor Stalled / Overload Fault (High Current Pull)";
-            if(data.interlockReason == 4) reasonText = "⚠️ Modbus Communications Network Failure";
-            document.getElementById('tripReason').innerText = reasonText;
-            document.getElementById('tripReason').style.color = "var(--danger)";
-        } else if(data.emergencyStop) {
-            document.getElementById('interlockStatus').innerHTML = '<span class="badge bg-alert">TRIPPED</span>';
-            document.getElementById('tripReason').innerText = "🚨 Emergency physical trip button pressed!";
-            document.getElementById('tripReason').style.color = "var(--danger)";
-        } else {
-            document.getElementById('interlockStatus').innerHTML = '<span class="badge bg-on">SAFE</span>';
-            document.getElementById('tripReason').innerText = "System parameters within operational margins.";
-            document.getElementById('tripReason').style.color = "var(--text-muted)";
-        }
-
-        // 8. Motor Protection Internal Memory Settings Data Maps
-        document.getElementById('protDryRun').innerText = (data.dryRunThreshold !== undefined) ? data.dryRunThreshold.toFixed(1) + " A" : "Not Set";
-        document.getElementById('protOverload').innerText = (data.overloadThreshold !== undefined) ? data.overloadThreshold.toFixed(1) + " A" : "Not Set";
-
-        // 9. Automation Schedule Engine Logic
-        if(data.scheduledStartTime) {
-            document.getElementById('schedTime').innerText = data.scheduledStartTime;
-            document.getElementById('schedDuration').innerText = data.scheduledDuration ? data.scheduledDuration + " mins remaining" : "0 mins";
-        } else {
-            document.getElementById('schedTime').innerText = "Manual Control Mode";
-            document.getElementById('schedDuration').innerText = "Infinite (No Auto Shutdown)";
-        }
-
-        // 10. Device Heartbeat Diagnostic Lifeline
-        if(data.rssi) {
-            document.getElementById('wifiSignal').innerText = data.rssi + " dBm";
-        }
-        if(data.heartbeat) {
-            let date = new Date(data.heartbeat * 1000);
-            document.getElementById('lastSeen').innerText = date.toLocaleTimeString();
-        }
-    });
-</script>
-
+    </script>
 </body>
 </html>

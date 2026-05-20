@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Irrigation Control Center</title>
+    
+    <!-- Firebase Legacy SDK (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            
+            --primary: #10b981;    /* Emerald Green */
+            --secondary: #3b82f6;  /* Electric Blue */
+            --warning: #f59e0b;    /* Amber */
+            --danger: #ef4444;     /* Rose Red */
+            --purple: #8b5cf6;     /* Purple */
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            margin: 0;
+            padding: 30px 20px;
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin: 0 0 8px 0;
+            background: linear-gradient(to right, #34d399, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.05em;
+        }
+
+        header p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        /* Responsive Grid Integration */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 24px;
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        .status-display {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .status-val {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .sub-text {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin: 8px 0 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Component Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .bg-on { background-color: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .bg-off { background-color: rgba(148, 163, 184, 0.15); color: var(--text-muted); border: 1px solid rgba(148, 163, 184, 0.3); }
+        .bg-alert { background-color: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); animation: pulse 2s infinite; }
+        .bg-warn { background-color: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+
+        /* Tables for Data Arrays */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 8px 4px;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+        }
+        td {
+            padding: 10px 4px;
+            font-size: 0.95rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .phase-r { color: #f87171; font-weight: 600; }
+        .phase-y { color: #fbbf24; font-weight: 600; }
+        .phase-b { color: #60a5fa; font-weight: 600; }
+
+        /* UI Control Items */
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.9rem;
+        }
+        .data-row:last-child { border: none; }
+        .data-label { color: var(--text-muted); }
+        .data-value { font-weight: 600; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Smart Irrigation Control Center</h1>
+        <p>Real-Time Hardware Status & Monitoring Dashboard</p>
+    </header>
+
+    <!-- Top Row: Core Relays & Modes -->
+    <div class="grid">
+        <!-- Pump Control Status -->
+        <div class="card">
+            <h2>Pump Actuation Status</h2>
+            <div class="status-display">
+                <span class="data-label">Primary Station Pump</span>
+                <div id="mainPumpState"><span class="badge bg-off">OFF</span></div>
+            </div>
+            <div class="status-display" style="margin-top: 15px;">
+                <span class="data-label">Fertigation Dosing Pump</span>
+                <div id="fertPumpState"><span class="badge bg-off">OFF</span></div>
+            </div>
+        </div>
+
+        <!-- Irrigation Fluid Paths & Backwash -->
+        <div class="card">
+            <h2>Flow Distributions</h2>
+            <div class="status-display">
+                <div class="status-val" id="activeZone" style="color: var(--secondary);">Loading...</div>
+            </div>
+            <div class="sub-text">Fertigation Target: <span id="activeFert" style="color: var(--purple); font-weight: bold;">None</span></div>
+            <div class="data-row" style="margin-top: 12px; border-top: 1px solid var(--card-border); padding-top: 10px;">
+                <span class="data-label">Backwash Filtration Mode</span>
+                <span id="backwashBadge" class="badge bg-off">Inactive</span>
+            </div>
+        </div>
+
+        <!-- System Safety Metrics -->
+        <div class="card">
+            <h2>System Interlock Status</h2>
+            <div class="status-display">
+                <div id="interlockStatus"><span class="badge bg-on">SAFE</span></div>
+            </div>
+            <p class="sub-text" id="tripReason" style="font-weight: 500;">No system faults detected.</p>
+        </div>
+    </div>
+
+    <!-- Bottom Row: Scheduling, Metering, Diagnostics -->
+    <div class="grid">
+        <!-- Motor Protection Parameters -->
+        <div class="card">
+            <h2>Motor Protection & Power</h2>
+            <div class="data-row">
+                <span class="data-label">Dry Run Threshold Protection</span>
+                <span class="data-value" id="protDryRun" style="color: var(--warning);">Loading...</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Overload Trip Threshold</span>
+                <span class="data-value" id="protOverload" style="color: var(--danger);">Loading...</span>
+            </div>
+            <div class="data-row" style="margin-top: 8px;">
+                <span class="data-label">Aggregated System Power Load</span>
+                <span class="data-value"><span id="totalPower" style="color: var(--primary); font-size: 1.1rem;">0.00</span> kW</span>
+            </div>
+        </div>
+
+        <!-- Electrical Modbus Grid Telemetry -->
+        <div class="card">
+            <h2>3-Phase Power Meter (Modbus)</h2>
+            <table>
+                <thead>
+                    <tr><th>Phase Line</th><th>Potential</th><th>Draw Balance</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td class="phase-r">Phase R Line</td><td id="vR">0.0 V</td><td id="aR">0.0 A</td></tr>
+                    <tr><td class="phase-y">Phase Y Line</td><td id="vY">0.0 V</td><td id="aY">0.0 A</td></tr>
+                    <tr><td class="phase-b">Phase B Line</td><td id="vB">0.0 V</td><td id="aB">0.0 A</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Automation Calendars & Hardware Lifeline -->
+        <div class="card">
+            <h2>Automation Schedule & Link</h2>
+            <div class="data-row">
+                <span class="data-label">Active Program Target Time</span>
+                <span class="data-value" id="schedTime" style="color: var(--secondary);">Not Scheduled</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Active Program Runtime Remaining</span>
+                <span class="data-value" id="schedDuration">0 min</span>
+            </div>
+            <div class="status-display" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--card-border);">
+                <span class="sub-text">Signal: <span id="wifiSignal" style="font-weight: 600; color: var(--text-main);">📶 Loading...</span></span>
+                <span class="sub-text">Heartbeat: <span id="lastSeen" style="font-weight: 600; color: var(--text-main);">Never</span></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // FIX: Cleaned syntax config definition map 
+    const firebaseConfig = {
+        apiKey: "AIzaSyD6xT-wP2WeLB-ZRf2Yh9lPHvE6tpOK6Zo",
+        databaseURL: "https://smart-irrigation-2-393b4-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    
+    // Initialize Database References
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Stream live data entries directly from root /system structure node
+    database.ref('/system').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        // 1. Line Voltage Matrix Engine
+        document.getElementById('vR').innerText = (data.voltageR !== undefined && data.voltageR >= 0) ? data.voltageR.toFixed(1) + " V" : "Fault";
+        document.getElementById('vY').innerText = (data.voltageY !== undefined && data.voltageY >= 0) ? data.voltageY.toFixed(1) + " V" : "Fault";
+        document.getElementById('vB').innerText = (data.voltageB !== undefined && data.voltageB >= 0) ? data.voltageB.toFixed(1) + " V" : "Fault";
+
+        // 2. Current Draw Ampere Calculations
+        document.getElementById('aR').innerText = (data.currentR !== undefined && data.currentR >= 0) ? data.currentR.toFixed(1) + " A" : "0.0 A";
+        document.getElementById('aY').innerText = (data.currentY !== undefined && data.currentY >= 0) ? data.currentY.toFixed(1) + " A" : "0.0 A";
+        document.getElementById('aB').innerText = (data.currentB !== undefined && data.currentB >= 0) ? data.currentB.toFixed(1) + " A" : "0.0 A";
+
+        // 3. Accumulated Power Engine
+        document.getElementById('totalPower').innerText = data.power ? (data.power / 1000).toFixed(2) : "0.00";
+
+        // 4. Actuator Relays (Primary & Dosing Pumps)
+        document.getElementById('mainPumpState').innerHTML = data.pump1Active ? 
+            '<span class="badge bg-on">RUNNING</span>' : '<span class="badge bg-off">OFF</span>';
+
+        if(data.fertPumpActive) {
+            document.getElementById('fertPumpState').innerHTML = '<span class="badge bg-on">RUNNING</span>';
+        } else {
+            document.getElementById('fertPumpState').innerHTML = '<span class="badge bg-off">OFF</span>';
+        }
+
+        // 5. Backwash State and Active Irrigation Zones Parsing
+        if(data.isBackwashActive) {
+            document.getElementById('activeZone').innerText = "Backwash Active";
+            document.getElementById('activeZone').style.color = "var(--warning)";
+            document.getElementById('backwashBadge').className = "badge bg-alert";
+            document.getElementById('backwashBadge').innerText = "Flushing";
+        } else {
+            document.getElementById('backwashBadge').className = "badge bg-off";
+            document.getElementById('backwashBadge').innerText = "Inactive";
+            
+            if(data.activeIrrZone && data.activeIrrZone > 0) {
+                document.getElementById('activeZone').innerText = "Zone " + data.activeIrrZone;
+                document.getElementById('activeZone').style.color = "var(--primary)";
+            } else {
+                document.getElementById('activeZone').innerText = "Standby (No Active Zone)";
+                document.getElementById('activeZone').style.color = "var(--text-muted)";
+            }
+        }
+
+        // 6. Fertigation Compartment Target Assignments
+        if(data.activeFertZone && data.activeFertZone > 0) {
+            document.getElementById('activeFert').innerText = "Tank Compartment " + data.activeFertZone;
+            document.getElementById('activeFert').style.color = "var(--purple)";
+        } else {
+            document.getElementById('activeFert').innerText = "None";
+            document.getElementById('activeFert').style.color = "var(--text-muted)";
+        }
+
+        // 7. Motor Fault Detection & Diagnostic Interlocks
+        if(data.interlockReason && data.interlockReason > 0) {
+            document.getElementById('interlockStatus').innerHTML = '<span class="badge bg-alert">PAUSED</span>';
+            let reasonText = "Hardware Fault Halt Interlock Activated";
+            if(data.interlockReason == 1) reasonText = "⚠️ Volumetric Phase Error (High/Low Voltage Spike)";
+            if(data.interlockReason == 2) reasonText = "⚠️ Dry Run Fault Interrupted (Critical Low Current)";
+            if(data.interlockReason == 3) reasonText = "⚠️ Motor Stalled / Overload Fault (High Current Pull)";
+            if(data.interlockReason == 4) reasonText = "⚠️ Modbus Communications Network Failure";
+            document.getElementById('tripReason').innerText = reasonText;
+            document.getElementById('tripReason').style.color = "var(--danger)";
+        } else if(data.emergencyStop) {
+            document.getElementById('interlockStatus').innerHTML = '<span class="badge bg-alert">TRIPPED</span>';
+            document.getElementById('tripReason').innerText = "🚨 Emergency physical trip button pressed!";
+            document.getElementById('tripReason').style.color = "var(--danger)";
+        } else {
+            document.getElementById('interlockStatus').innerHTML = '<span class="badge bg-on">SAFE</span>';
+            document.getElementById('tripReason').innerText = "System parameters within operational margins.";
+            document.getElementById('tripReason').style.color = "var(--text-muted)";
+        }
+
+        // 8. Motor Protection Internal Memory Settings Data Maps
+        document.getElementById('protDryRun').innerText = (data.dryRunThreshold !== undefined) ? data.dryRunThreshold.toFixed(1) + " A" : "Not Set";
+        document.getElementById('protOverload').innerText = (data.overloadThreshold !== undefined) ? data.overloadThreshold.toFixed(1) + " A" : "Not Set";
+
+        // 9. Automation Schedule Engine Logic
+        if(data.scheduledStartTime) {
+            document.getElementById('schedTime').innerText = data.scheduledStartTime;
+            document.getElementById('schedDuration').innerText = data.scheduledDuration ? data.scheduledDuration + " mins remaining" : "0 mins";
+        } else {
+            document.getElementById('schedTime').innerText = "Manual Control Mode";
+            document.getElementById('schedDuration').innerText = "Infinite (No Auto Shutdown)";
+        }
+
+        // 10. Device Heartbeat Diagnostic Lifeline
+        if(data.rssi) {
+            document.getElementById('wifiSignal').innerText = data.rssi + " dBm";
+        }
+        if(data.heartbeat) {
+            let date = new Date(data.heartbeat * 1000);
+            document.getElementById('lastSeen').innerText = date.toLocaleTimeString();
+        }
+    });
+</script>
+
+</body>
+</html>

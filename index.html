@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap');
         
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
@@ -21,7 +21,7 @@
         }
         .panel-card {
             background-color: #111c32;
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
         }
         .input-field {
             background-color: #090f1d;
@@ -39,135 +39,123 @@
 </head>
 <body class="text-slate-200 min-h-screen flex justify-center items-center p-0 sm:p-4" x-data="sipConsoleApp()">
 
-    <div class="w-full max-w-md app-container min-h-screen sm:min-h-[840px] sm:h-[840px] sm:rounded-[40px] shadow-2xl relative flex flex-col overflow-hidden border border-slate-900">
+    <div class="w-full max-w-md app-container min-h-screen sm:min-h-[880px] sm:h-[880px] sm:rounded-[40px] shadow-2xl relative flex flex-col overflow-hidden border border-slate-900">
         
-        <!-- TOP DEVICE STATUS BAR -->
-        <header class="pt-3 px-6 pb-2 flex justify-between items-center text-xs font-semibold select-none text-white shrink-0">
-            <span class="font-mono text-xs" x-text="deviceTime">2:17</span>
-            <div class="flex items-center gap-1.5 text-[10px]">
+        <header class="pt-3 px-6 pb-2 flex justify-between items-center text-sm font-semibold select-none text-white shrink-0">
+            <span class="font-mono text-sm" x-text="deviceTime">02:17</span>
+            <div class="flex items-center gap-2 text-xs">
                 <span>0.10 KB/s</span>
-                <span class="bg-slate-800 px-1 py-0.5 rounded text-[8px] font-bold text-cyan-400">5G+</span>
+                <span class="bg-slate-800 px-1.5 py-0.5 rounded text-[10px] font-bold text-cyan-400">5G+</span>
                 <span>📶🔋</span>
             </div>
         </header>
 
-        <!-- APP NAVIGATION NODE BAR -->
-        <nav class="px-5 py-2 flex justify-between items-center shrink-0 border-b border-slate-900/60">
-            <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-lg bg-blue-600 flex flex-col items-center justify-center gap-0.5 shadow-md">
-                    <div class="w-3.5 h-0.5 bg-white rounded-full"></div>
-                    <div class="w-3.5 h-0.5 bg-white rounded-full"></div>
-                    <div class="w-3.5 h-0.5 bg-white rounded-full"></div>
+        <nav class="px-5 py-3 flex justify-between items-center shrink-0 border-b border-slate-900/60">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex flex-col items-center justify-center gap-0.5 shadow-md">
+                    <div class="w-4 h-0.5 bg-white rounded-full"></div>
+                    <div class="w-4 h-0.5 bg-white rounded-full"></div>
+                    <div class="w-4 h-0.5 bg-white rounded-full"></div>
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] font-bold text-slate-400 tracking-wider uppercase leading-none">Node Monitor</span>
-                    <span class="text-base font-extrabold text-white tracking-tight mt-0.5">SIP-CONSOLE</span>
+                    <span class="text-[11px] font-extrabold text-slate-400 tracking-wider uppercase leading-none">Node Monitor</span>
+                    <span class="text-lg font-black text-white tracking-tight mt-0.5">SIP-CONSOLE</span>
                 </div>
             </div>
 
             <div class="flex items-center gap-2">
-                <div class="px-2.5 py-1 rounded-full text-[9px] font-extrabold tracking-wider font-mono flex items-center gap-1.5 transition-all"
+                <div class="px-3 py-1 rounded-full text-xs font-extrabold tracking-wider font-mono flex items-center gap-2 transition-all"
                      :class="systemOnline ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'">
-                    <span class="w-1 h-1 rounded-full bg-current" :class="systemOnline && 'animate-pulse'"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-current" :class="systemOnline && 'animate-pulse'"></span>
                     <span x-text="systemOnline ? 'ONLINE NODE' : 'OFFLINE'"></span>
                 </div>
-                <button @click="toggleSystemPower()" class="w-7 h-7 rounded-lg panel-card flex items-center justify-center text-xs text-slate-400 hover:text-white transition-colors">
+                <button @click="toggleSystemPower()" class="w-8 h-8 rounded-lg panel-card flex items-center justify-center text-sm text-slate-400 hover:text-white transition-colors">
                     🚪
                 </button>
             </div>
         </nav>
 
-        <!-- DYNAMIC CONFIGURATION/MONITORING MAIN CORE -->
         <div class="flex-1 overflow-y-auto custom-scroll pb-24 relative">
             
-            <!-- MAIN VIEW SCREEN -->
             <div x-show="currentView === 'dashboard'" class="p-4 space-y-4" x-transition.opacity>
                 
-                <!-- SYSTEM MAIN METRICS ENGINE -->
-                <section class="panel-card rounded-2xl p-4 space-y-3">
+                <section class="panel-card rounded-2xl p-4 space-y-3.5">
                     <div class="flex justify-between items-center">
                         <div>
-                            <span class="text-[9px] font-mono tracking-widest text-slate-400 uppercase font-bold block">System Status</span>
-                            <h2 class="text-xl font-black tracking-tight text-white mt-0.5" x-text="currentSystemState">STANDBY</h2>
+                            <span class="text-[10px] font-mono tracking-widest text-slate-400 uppercase font-extrabold block">System Status</span>
+                            <h2 class="text-2xl font-black tracking-tight text-white mt-0.5" x-text="currentSystemState">STANDBY</h2>
                         </div>
-                        <span class="text-[10px] font-mono font-bold text-slate-400" x-text="liveClockStamp">14:17:29</span>
+                        <span class="text-xs font-mono font-bold text-slate-400 bg-slate-950/40 px-2 py-1 rounded-md" x-text="liveClockStamp">14:17:22</span>
                     </div>
-                    <p class="text-xs text-slate-400 leading-relaxed font-medium" x-text="statusSubtitleText">Awaiting schedule execution.</p>
+                    <p class="text-sm text-slate-300 leading-relaxed font-medium" x-text="statusSubtitleText">Awaiting schedule execution.</p>
                     
-                    <div class="flex gap-4 pt-1 text-xs font-bold text-slate-300">
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-blue-400">🌊</span> Main Pump: <span :class="mainPumpActive ? 'text-emerald-400':'text-slate-400'" x-text="mainPumpActive ? 'ON' : 'OFF'">OFF</span>
+                    <div class="flex gap-5 pt-1 text-sm font-bold text-slate-200">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base text-blue-400">🌊</span> Main Pump: <span :class="mainPumpActive ? 'text-emerald-400':'text-slate-400'" x-text="mainPumpActive ? 'ON' : 'OFF'">OFF</span>
                         </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-cyan-400">🧪</span> Fert Pump: <span :class="fertPumpActive ? 'text-cyan-400':'text-slate-400'" x-text="fertPumpActive ? 'ON' : 'OFF'">OFF</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-base text-cyan-400">🧪</span> Fert Pump: <span :class="fertPumpActive ? 'text-cyan-400':'text-slate-400'" x-text="fertPumpActive ? 'ON' : 'OFF'">OFF</span>
                         </div>
                     </div>
 
-                    <!-- 3-PHASE RYB ELECTRICAL TELEMETRY SYSTEM -->
-                    <div class="space-y-2 pt-3 border-t border-slate-800/60 font-mono">
-                        <span class="text-[9px] uppercase font-bold tracking-wider text-slate-500 block">⚡ 3-Phase Power System (RYB)</span>
+                    <div class="space-y-2.5 pt-3.5 border-t border-slate-800/60 font-mono">
+                        <span class="text-[10px] uppercase font-extrabold tracking-wider text-slate-400 block">⚡ 3-Phase Multimeter Telemetry</span>
                         
                         <div class="grid grid-cols-3 gap-2">
-                            <!-- R-PHASE DATA -->
-                            <div class="input-field p-2 rounded-xl flex flex-col justify-center border-l-2 border-rose-500">
-                                <span class="text-[8px] font-bold text-rose-400">🔴 R-PHASE</span>
-                                <span class="text-xs font-bold mt-1 text-white" x-text="systemOnline ? telemetryRYB.vR + 'V' : '---'"></span>
-                                <span class="text-[9px] text-slate-400 mt-0.5" x-text="systemOnline ? telemetryRYB.cR + 'A' : '-- A'"></span>
+                            <div class="input-field p-2.5 rounded-xl flex flex-col justify-center border-l-4 border-rose-500 bg-[#090f1d]">
+                                <span class="text-[9px] font-extrabold text-rose-400">🔴 R-PHASE</span>
+                                <div class="text-sm font-bold mt-1 text-white" x-text="systemOnline ? telemetryRYB.vR + ' V' : '---'"></div>
+                                <div class="text-xs font-bold text-rose-300/90 mt-0.5" x-text="systemOnline ? telemetryRYB.cR + ' A' : '-- A'"></div>
                             </div>
-                            <!-- Y-PHASE DATA -->
-                            <div class="input-field p-2 rounded-xl flex flex-col justify-center border-l-2 border-amber-400">
-                                <span class="text-[8px] font-bold text-amber-400">🟡 Y-PHASE</span>
-                                <span class="text-xs font-bold mt-1 text-white" x-text="systemOnline ? telemetryRYB.vY + 'V' : '---'"></span>
-                                <span class="text-[9px] text-slate-500 mt-0.5">Balanced</span>
+                            <div class="input-field p-2.5 rounded-xl flex flex-col justify-center border-l-4 border-amber-400 bg-[#090f1d]">
+                                <span class="text-[9px] font-extrabold text-amber-400">🟡 Y-PHASE</span>
+                                <div class="text-sm font-bold mt-1 text-white" x-text="systemOnline ? telemetryRYB.vY + ' V' : '---'"></div>
+                                <div class="text-xs font-bold text-amber-300/90 mt-0.5" x-text="systemOnline ? telemetryRYB.cY + ' A' : '-- A'"></div>
                             </div>
-                            <!-- B-PHASE DATA -->
-                            <div class="input-field p-2 rounded-xl flex flex-col justify-center border-l-2 border-blue-500">
-                                <span class="text-[8px] font-bold text-blue-400">🔵 B-PHASE</span>
-                                <span class="text-xs font-bold mt-1 text-white" x-text="systemOnline ? telemetryRYB.vB + 'V' : '---'"></span>
-                                <span class="text-[9px] text-slate-500 mt-0.5">Balanced</span>
+                            <div class="input-field p-2.5 rounded-xl flex flex-col justify-center border-l-4 border-blue-500 bg-[#090f1d]">
+                                <span class="text-[9px] font-extrabold text-blue-400">🔵 B-PHASE</span>
+                                <div class="text-sm font-bold mt-1 text-white" x-text="systemOnline ? telemetryRYB.vB + ' V' : '---'"></div>
+                                <div class="text-xs font-bold text-blue-300/90 mt-0.5" x-text="systemOnline ? telemetryRYB.cB + ' A' : '-- A'"></div>
                             </div>
                         </div>
 
-                        <!-- SYSTEM CONSUMPTION LOAD RUN RATE -->
-                        <div class="bg-slate-950/40 p-2 rounded-xl flex justify-between items-center text-xs text-slate-400 border border-slate-900">
-                            <span>TOTAL COMPUTED POWER LOAD:</span>
-                            <span class="font-bold text-emerald-400" x-text="systemOnline ? powerReadout + ' W' : '-- W'">0 W</span>
+                        <div class="bg-slate-950/50 p-3 rounded-xl flex justify-between items-center text-xs tracking-wider text-slate-300 border border-slate-900">
+                            <span class="font-bold text-slate-400">TOTAL TRUE POWER:</span>
+                            <span class="text-base font-black text-emerald-400" x-text="systemOnline ? powerReadout + ' W' : '0 W'">0 W</span>
                         </div>
                     </div>
                 </section>
 
-                <!-- ENVIRONMENT CONDITIONS STATUS PANEL -->
                 <section class="panel-card rounded-2xl p-4 flex items-center justify-between relative overflow-hidden">
                     <div class="space-y-1">
                         <div class="flex items-baseline gap-2">
                             <span class="text-3xl font-black text-white tracking-tight">30°C</span>
                             <span class="text-xs font-semibold text-slate-400">Wind: 18.3 Km/h</span>
                         </div>
-                        <div class="text-[10px] font-bold tracking-wider text-slate-400 uppercase flex items-center gap-1">📍 PAZHAYANNŪR, INDIA ✒️</div>
+                        <div class="text-[11px] font-extrabold tracking-wider text-slate-400 uppercase flex items-center gap-1">📍 PAZHAYANNŪR, INDIA ✒️</div>
                     </div>
-                    <div class="text-3xl filter drop-shadow-md">🌤️</div>
+                    <div class="text-4xl filter drop-shadow-md">🌤️</div>
                 </section>
 
-                <!-- IRRIGATION FLOW CONTROL GRID (10 ZONES) -->
                 <section class="space-y-2">
-                    <h3 class="text-[11px] font-black tracking-widest text-slate-400 font-mono uppercase">Irrigation Zones (1-10)</h3>
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <h3 class="text-xs font-black tracking-widest text-slate-400 font-mono uppercase">Irrigation Grid (Zones 1-10)</h3>
+                    <div class="grid grid-cols-2 gap-3">
                         <template x-for="z in 10" :key="'zone-'+z">
-                            <div class="panel-card p-3 rounded-xl flex flex-col justify-between h-20 relative cursor-pointer group transition-all"
+                            <div class="panel-card p-3 rounded-xl flex flex-col justify-between h-24 relative cursor-pointer group transition-all"
                                  :class="activeLiveZone === z && 'border-emerald-500 bg-emerald-950/10'"
                                  @click="triggerManualOverrideZoneModal(z)">
                                 <div class="flex justify-between items-start">
-                                    <span class="text-base" :class="activeLiveZone === z ? 'text-emerald-400' : 'text-slate-500'">💧</span>
+                                    <span class="text-lg" :class="activeLiveZone === z ? 'text-emerald-400' : 'text-slate-500'">💧</span>
                                     <label class="relative inline-flex items-center cursor-pointer" @click.stop>
                                         <input type="checkbox" :checked="activeLiveZone === z" @change="toggleZoneDirectly(z, $event.target.checked)" class="sr-only peer">
-                                        <div class="w-7 h-4 bg-slate-800 rounded-full peer-checked:bg-emerald-500 transition-colors flex items-center px-0.5">
-                                            <div class="w-3 h-3 bg-white rounded-full transition-transform" :class="activeLiveZone === z && 'translate-x-3'"></div>
+                                        <div class="w-8 h-4.5 bg-slate-800 rounded-full peer-checked:bg-emerald-500 transition-colors flex items-center px-0.5">
+                                            <div class="w-3.5 h-3.5 bg-white rounded-full transition-transform" :class="activeLiveZone === z && 'translate-x-3.5'"></div>
                                         </div>
                                     </label>
                                 </div>
-                                <div>
-                                    <h4 class="text-xs font-bold text-white" x-text="'Zone ' + z"></h4>
-                                    <span class="text-[10px] font-mono font-bold uppercase transition-colors"
+                                <div class="mt-2">
+                                    <h4 class="text-sm font-extrabold text-white" x-text="'Zone ' + z"></h4>
+                                    <span class="text-[11px] font-mono font-black uppercase tracking-wider transition-colors"
                                           :class="activeLiveZone === z ? 'text-emerald-400' : 'text-slate-500'" 
                                           x-text="activeLiveZone === z ? 'RUNNING' : 'STANDBY'"></span>
                                 </div>
@@ -176,25 +164,24 @@
                     </div>
                 </section>
 
-                <!-- DOSING FERTILIZATION DISTRIBUTION CONTROLLERS (6 SYSTEM ENGINES) -->
                 <section class="space-y-2">
-                    <h3 class="text-[11px] font-black tracking-widest text-slate-400 font-mono uppercase">Fertilizer Compartments (1-6)</h3>
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <h3 class="text-xs font-black tracking-widest text-slate-400 font-mono uppercase">Fertilizer Compartments (1-6)</h3>
+                    <div class="grid grid-cols-2 gap-3">
                         <template x-for="c in 6" :key="'comp-'+c">
-                            <div class="panel-card p-3 rounded-xl flex flex-col justify-between h-20 relative transition-all"
+                            <div class="panel-card p-3 rounded-xl flex flex-col justify-between h-24 relative transition-all"
                                  :class="activeLiveCompartment === c ? 'border-cyan-500 bg-cyan-950/10' : (!mainPumpActive && 'opacity-40')">
                                 <div class="flex justify-between items-start">
-                                    <span class="text-base" :class="activeLiveCompartment === c ? 'text-cyan-400' : 'text-slate-600'">🧪</span>
+                                    <span class="text-lg" :class="activeLiveCompartment === c ? 'text-cyan-400' : 'text-slate-600'">🧪</span>
                                     <label class="relative inline-flex items-center cursor-pointer" @click.stop>
                                         <input type="checkbox" :disabled="!mainPumpActive" :checked="activeLiveCompartment === c" @change="toggleCompartmentDirectly(c, $event.target.checked)" class="sr-only peer">
-                                        <div class="w-7 h-4 bg-slate-800 rounded-full peer-checked:bg-cyan-500 transition-colors flex items-center px-0.5">
-                                            <div class="w-3 h-3 bg-white rounded-full transition-transform" :class="activeLiveCompartment === c && 'translate-x-3'"></div>
+                                        <div class="w-8 h-4.5 bg-slate-800 rounded-full peer-checked:bg-cyan-500 transition-colors flex items-center px-0.5">
+                                            <div class="w-3.5 h-3.5 bg-white rounded-full transition-transform" :class="activeLiveCompartment === c && 'translate-x-3.5'"></div>
                                         </div>
                                     </label>
                                 </div>
-                                <div>
-                                    <h4 class="text-xs font-bold text-white" x-text="'Compartment ' + c"></h4>
-                                    <span class="text-[10px] font-mono font-bold uppercase transition-colors"
+                                <div class="mt-2">
+                                    <h4 class="text-sm font-extrabold text-white" x-text="'Compartment ' + c"></h4>
+                                    <span class="text-[11px] font-mono font-black uppercase tracking-wider transition-colors"
                                           :class="activeLiveCompartment === c ? 'text-cyan-400' : 'text-slate-500'"
                                           x-text="activeLiveCompartment === c ? 'INJECTING' : 'DISABLED'"></span>
                                 </div>
@@ -204,187 +191,229 @@
                 </section>
             </div>
 
-            <!-- BACKSTAGE INFRASTRUCTURE CONFIGURATIONS PANEL -->
             <div x-show="currentView === 'config'" class="p-4 space-y-4" x-transition.opacity>
                 
                 <div class="flex justify-between items-center pb-2 border-b border-slate-800">
-                    <h2 class="text-base font-black text-white">Automations & Config</h2>
-                    <button @click="currentView = 'dashboard'" class="px-3 py-1 bg-slate-800 text-slate-200 rounded-lg text-xs font-bold font-mono">Done</button>
+                    <h2 class="text-lg font-black text-white">Automations & Config</h2>
+                    <button @click="currentView = 'dashboard'" class="px-3 py-1.5 bg-slate-800 text-slate-200 rounded-lg text-xs font-bold font-mono">Done</button>
                 </div>
 
-                <!-- HARDWARE FLUSH BACKWASH PARAMETERS -->
-                <section class="panel-card rounded-2xl p-4 space-y-3 border border-purple-900/30">
+                <section class="panel-card rounded-2xl p-4 space-y-3.5 border border-purple-900/30">
                     <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-1.5 text-purple-400 font-bold text-xs font-mono uppercase">
-                            <span>♻️</span> Backwash (Flush) Configuration
+                        <div class="flex items-center gap-1.5 text-purple-400 font-bold text-sm font-mono uppercase">
+                            <span>♻️</span> Backwash Configuration
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" x-model="backwashConfig.enabled" class="sr-only peer">
-                            <div class="w-8 h-4 bg-slate-800 rounded-full peer-checked:bg-purple-500 transition-colors flex items-center px-0.5">
-                                <div class="w-3 h-3 bg-white rounded-full transition-transform" :class="backwashConfig.enabled && 'translate-x-4'"></div>
+                            <div class="w-9 h-5 bg-slate-800 rounded-full peer-checked:bg-purple-500 transition-colors flex items-center px-0.5">
+                                <div class="w-4 h-4 bg-white rounded-full transition-transform" :class="backwashConfig.enabled && 'translate-x-4'"></div>
                             </div>
                         </label>
                     </div>
 
-                    <div class="space-y-3 text-xs" :class="!backwashConfig.enabled && 'opacity-30 pointer-events-none'">
+                    <div class="space-y-3 text-sm" :class="!backwashConfig.enabled && 'opacity-30 pointer-events-none'">
                         <div class="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
-                            <span class="text-slate-400 font-medium">Run Time</span>
-                            <input type="time" x-model="backwashConfig.runTime" class="input-field rounded-lg px-2 py-1 font-bold text-center text-xs">
+                            <span class="text-slate-300 font-medium">Run Time</span>
+                            <input type="time" x-model="backwashConfig.runTime" class="input-field rounded-lg px-2 py-1.5 font-bold text-center text-sm">
                         </div>
                         <div class="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
-                            <span class="text-slate-400 font-medium">Duration (Mins)</span>
-                            <input type="number" x-model.number="backwashConfig.duration" class="w-16 input-field rounded-lg p-1 font-bold text-center text-xs">
+                            <span class="text-slate-300 font-medium">Duration (Mins)</span>
+                            <input type="number" x-model.number="backwashConfig.duration" class="w-20 input-field rounded-lg p-1.5 font-bold text-center text-sm">
                         </div>
 
                         <div class="space-y-1.5">
-                            <span class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Execution Days:</span>
+                            <span class="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Execution Days:</span>
                             <div class="flex flex-wrap gap-1.5">
                                 <template x-for="day in ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']">
                                     <button @click="toggleBackwashDay(day)"
-                                            class="px-2.5 py-1.5 rounded-lg border text-[10px] font-bold transition-all"
+                                            class="px-3 py-2 rounded-lg border text-xs font-bold transition-all"
                                             :class="backwashConfig.days.includes(day) ? 'bg-purple-600/20 border-purple-500 text-purple-300' : 'bg-slate-900 border-slate-800 text-slate-400'"
                                             x-text="day"></button>
                                 </template>
                             </div>
                         </div>
                     </div>
-                    <button @click="commitBackwashChanges()" class="w-full py-2 bg-purple-600 hover:bg-purple-500 font-bold text-xs tracking-wider rounded-xl text-white transition-colors">💾 Save Backwash Settings</button>
+                    <button @click="commitBackwashChanges()" class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 font-black text-xs tracking-wider rounded-xl text-white uppercase transition-colors">💾 Save Backwash Settings</button>
                 </section>
 
-                <!-- HARDWARE SAFETY GUARD PROTECTION PROFILES -->
-                <section class="panel-card rounded-2xl p-4 space-y-3 border border-amber-900/30">
+                <section class="panel-card rounded-2xl p-4 space-y-4 border border-amber-900/30">
                     <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-1.5 text-amber-500 font-bold text-xs font-mono uppercase">
-                            <span>🛡️</span> Motor Protection Limits
+                        <div class="flex items-center gap-1.5 text-amber-500 font-bold text-sm font-mono uppercase">
+                            <span>🛡️</span> Motor Protection Parameters
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" x-model="hardwareSafety.enabled" class="sr-only peer">
-                            <div class="w-8 h-4 bg-slate-800 rounded-full peer-checked:bg-amber-500 transition-colors flex items-center px-0.5">
-                                <div class="w-3 h-3 bg-white rounded-full transition-transform" :class="hardwareSafety.enabled && 'translate-x-4'"></div>
+                            <div class="w-9 h-5 bg-slate-800 rounded-full peer-checked:bg-amber-500 transition-colors flex items-center px-0.5">
+                                <div class="w-4 h-4 bg-white rounded-full transition-transform" :class="hardwareSafety.enabled && 'translate-x-4'"></div>
                             </div>
                         </label>
                     </div>
 
-                    <div class="space-y-3 text-xs font-mono" :class="!hardwareSafety.enabled && 'opacity-30 pointer-events-none'">
-                        <div class="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
-                            <span class="text-slate-400 font-medium">Voltage Thresholds (V)</span>
-                            <div class="flex items-center gap-1">
-                                <input type="number" x-model.number="hardwareSafety.vMin" class="w-14 input-field rounded-lg p-1 text-center text-xs">
-                                <span class="text-slate-600">-</span>
-                                <input type="number" x-model.number="hardwareSafety.vMax" class="w-14 input-field rounded-lg p-1 text-center text-xs">
+                    <div class="space-y-4 text-sm font-mono" :class="!hardwareSafety.enabled && 'opacity-30 pointer-events-none'">
+                        
+                        <div class="space-y-2">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Phase Voltage Ranges (Volts Lower - Upper Limit)</span>
+                            
+                            <div class="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
+                                <span class="text-rose-400 font-bold text-xs">🔴 R-Phase Volts</span>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="number" x-model.number="hardwareSafety.vMinR" class="w-16 input-field rounded-lg p-1 text-center text-xs font-bold">
+                                    <span class="text-slate-600">-</span>
+                                    <input type="number" x-model.number="hardwareSafety.vMaxR" class="w-16 input-field rounded-lg p-1 text-center text-xs font-bold">
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
+                                <span class="text-amber-400 font-bold text-xs">🟡 Y-Phase Volts</span>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="number" x-model.number="hardwareSafety.vMinY" class="w-16 input-field rounded-lg p-1 text-center text-xs font-bold">
+                                    <span class="text-slate-600">-</span>
+                                    <input type="number" x-model.number="hardwareSafety.vMaxY" class="w-16 input-field rounded-lg p-1 text-center text-xs font-bold">
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
+                                <span class="text-blue-400 font-bold text-xs">🔵 B-Phase Volts</span>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="number" x-model.number="hardwareSafety.vMinB" class="w-16 input-field rounded-lg p-1 text-center text-xs font-bold">
+                                    <span class="text-slate-600">-</span>
+                                    <input type="number" x-model.number="hardwareSafety.vMaxB" class="w-16 input-field rounded-lg p-1 text-center text-xs font-bold">
+                                </div>
                             </div>
                         </div>
-                        <div class="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
-                            <span class="text-slate-400 font-medium">Max Phase Current (A)</span>
-                            <div class="flex items-center gap-1">
-                                <input type="number" step="0.1" x-model.number="hardwareSafety.cMax" class="w-14 input-field rounded-lg p-1 text-center text-xs">
+
+                        <div class="space-y-2">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Phase Current Ranges (Amps Lower - Upper Limit)</span>
+                            
+                            <div class="flex justify-between items-center bg-slate-950/60 p-2.5 rounded-xl border border-rose-950/40">
+                                <span class="text-rose-400 font-bold text-xs">🔴 R-Phase Amps</span>
+                                <div class="flex items-center gap-1">
+                                    <input type="number" step="0.1" x-model.number="hardwareSafety.cMinR" class="w-16 input-field rounded-lg p-1 text-center text-xs font-bold">
+                                    <span class="text-slate-600">-</span>
+                                    <input type="number" step="0.1" x-model.number="hardwareSafety.cMaxR" class="w-16 input-field rounded-lg p-1 text-center text-xs font-bold">
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center bg-slate-950/60 p-2.5 rounded-xl border border-amber-950/40">
+                                <span class="text-amber-400 font-bold text-xs">🟡 Y-Phase Amps</span>
+                                <div class="flex items-center gap-1">
+                                    <input type="number" step="0.1" x-model.number="hardwareSafety.cMinY" class="w-16 input-field rounded-lg p-1 text-center text-xs font-bold">
+                                    <span class="text-slate-600">-</span>
+                                    <input type="number" step="0.1" x-model.number="hardwareSafety.cMaxY" class="w-16 input-field rounded-lg p-1 text-center text-xs font-bold">
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center bg-slate-950/60 p-2.5 rounded-xl border border-blue-950/40">
+                                <span class="text-blue-400 font-bold text-xs">🔵 B-Phase Amps</span>
+                                <div class="flex items-center gap-1">
+                                    <input type="number" step="0.1" x-model.number="hardwareSafety.cMinB" class="w-16 input-field rounded-lg p-1 text-center text-xs font-bold">
+                                    <span class="text-slate-600">-</span>
+                                    <input type="number" step="0.1" x-model.number="hardwareSafety.cMaxB" class="w-16 input-field rounded-lg p-1 text-center text-xs font-bold">
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <button @click="commitSafetyLimits()" class="w-full py-2 bg-amber-600 hover:bg-amber-500 font-bold text-xs tracking-wider rounded-xl text-white transition-colors">💾 Save Limits</button>
+                    <button @click="commitSafetyLimits()" class="w-full py-2.5 bg-amber-600 hover:bg-amber-500 font-black text-xs tracking-wider rounded-xl text-white uppercase transition-colors">💾 Commit Safety Matrix parameters</button>
                 </section>
 
-                <!-- AUTOMATED AGRI SCHEDULING INTERFACES -->
                 <section class="space-y-2">
-                    <h3 class="text-[11px] font-black tracking-widest text-slate-400 font-mono uppercase">Watering Schedules</h3>
+                    <h3 class="text-xs font-black tracking-widest text-slate-400 font-mono uppercase">Automated Irrigation Profiles</h3>
                     
-                    <div class="space-y-2">
+                    <div class="space-y-2.5">
                         <template x-for="(sched, index) in globalSchedules" :key="'sched-'+index">
                             <div class="panel-card p-4 rounded-2xl relative border-l-4 border-blue-500 space-y-3">
                                 <div class="flex justify-between items-start">
                                     <div class="space-y-1">
                                         <div class="flex items-center gap-1.5 font-mono text-base font-bold text-white">
-                                            <span>⏱️</span> <span x-text="sched.times.join(' | ')">22:32</span>
+                                            <span>⏱️</span> <span x-text="sched.times.join(' | ')"></span>
                                         </div>
-                                        <div class="text-[10px] font-medium text-slate-400">DAYS: <span class="text-slate-300 font-bold" x-text="sched.days.join(', ')"></span></div>
-                                        <div class="text-[10px] font-bold">STATUS: <span :class="sched.active ? 'text-emerald-400':'text-slate-500'" x-text="sched.active ? 'ACTIVE':'DISABLED'">ACTIVE</span></div>
+                                        <div class="text-xs font-medium text-slate-300">DAYS: <span class="text-blue-400 font-extrabold" x-text="sched.days.join(', ')"></span></div>
+                                        <div class="text-xs font-bold mt-1">STATUS: <span :class="sched.active ? 'text-emerald-400':'text-slate-500'" x-text="sched.active ? 'ACTIVE':'DISABLED'">ACTIVE</span></div>
                                     </div>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" x-model="sched.active" class="sr-only peer">
-                                        <div class="w-8 h-4 bg-slate-800 rounded-full peer-checked:bg-blue-500 transition-colors flex items-center px-0.5">
-                                            <div class="w-3 h-3 bg-white rounded-full transition-transform" :class="sched.active && 'translate-x-4'"></div>
+                                        <div class="w-8 h-4.5 bg-slate-800 rounded-full peer-checked:bg-blue-500 transition-colors flex items-center px-0.5">
+                                            <div class="w-3.5 h-3.5 bg-white rounded-full transition-transform" :class="sched.active && 'translate-x-3.5'"></div>
                                         </div>
                                     </label>
                                 </div>
                                 
-                                <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/40 text-[10px] font-mono">
-                                    <button @click="openSchedulerWizardForModification(index)" class="py-1.5 rounded-lg bg-blue-950/40 text-blue-400 border border-blue-900/30 font-bold">📝 Edit Matrix</button>
-                                    <button @click="purgeScheduleBlock(index)" class="py-1.5 rounded-lg bg-rose-950/40 text-rose-400 border border-rose-900/30 font-bold">🗑️ Delete</button>
+                                <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/40 text-xs font-mono">
+                                    <button @click="openSchedulerWizardForModification(index)" class="py-2 rounded-lg bg-blue-950/40 text-blue-400 border border-blue-900/30 font-bold">📝 Edit Matrix</button>
+                                    <button @click="purgeScheduleBlock(index)" class="py-2 rounded-lg bg-rose-950/40 text-rose-400 border border-rose-900/30 font-bold">🗑️ Delete</button>
                                 </div>
                             </div>
                         </template>
                     </div>
 
-                    <button @click="openSchedulerWizardForModification(null)" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 font-bold text-xs tracking-widest uppercase rounded-2xl text-white transition-colors shadow-lg flex items-center justify-center gap-2 mt-4">
+                    <button @click="openSchedulerWizardForModification(null)" class="w-full py-4 bg-blue-600 hover:bg-blue-500 font-black text-xs tracking-widest uppercase rounded-2xl text-white transition-colors shadow-lg flex items-center justify-center gap-2 mt-4">
                         <span>+</span> Create New Matrix Profile
                     </button>
                 </section>
             </div>
         </div>
 
-        <!-- MATRIX INITIALIZATION BUILDER WIZARD -->
         <div x-show="currentView === 'wizard'" class="absolute inset-0 bg-[#0b1324] z-50 flex flex-col" x-transition.opacity>
             <header class="px-5 py-4 flex justify-between items-center border-b border-slate-900 shrink-0">
                 <h2 class="text-base font-black text-white">Modify Automation Matrix</h2>
-                <button @click="currentView = 'config'" class="px-3 py-1 bg-slate-800 text-slate-200 rounded-lg text-xs font-bold">Cancel</button>
+                <button @click="currentView = 'config'" class="px-3 py-1.5 bg-slate-800 text-slate-200 rounded-lg text-xs font-bold">Cancel</button>
             </header>
             
             <div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scroll pb-10">
                 <div class="panel-card p-4 rounded-2xl space-y-3">
                     <div class="flex justify-between items-center">
-                        <label class="text-[11px] font-black tracking-wider text-slate-400 uppercase font-mono">Start Times (Max 5)</label>
-                        <button @click="addNewTimeFieldToWizard()" class="px-2 py-1 bg-blue-600/20 text-blue-400 border border-blue-500/20 rounded-lg text-[10px] font-bold">+ Add Time</button>
+                        <label class="text-xs font-black tracking-wider text-slate-400 uppercase font-mono">Start Times (Max 5)</label>
+                        <button @click="addNewTimeFieldToWizard()" class="px-2 py-1 bg-blue-600/20 text-blue-400 border border-blue-500/20 rounded-lg text-xs font-bold">+ Add Time</button>
                     </div>
                     
                     <div class="space-y-2">
                         <template x-for="(t, idx) in wizardModel.times" :key="'time-'+idx">
                             <div class="flex items-center gap-2">
-                                <input type="time" x-model="wizardModel.times[idx]" class="flex-1 input-field rounded-xl p-2.5 font-bold font-mono text-center text-sm">
-                                <button @click="wizardModel.times.splice(idx, 1)" class="w-10 h-10 rounded-xl bg-rose-950/40 border border-rose-900/30 text-rose-400 font-bold flex items-center justify-center">✕</button>
+                                <input type="time" x-model="wizardModel.times[idx]" class="flex-1 input-field rounded-xl p-3 font-bold font-mono text-center text-base">
+                                <button @click="wizardModel.times.splice(idx, 1)" class="w-12 h-12 rounded-xl bg-rose-950/40 border border-rose-900/30 text-rose-400 font-bold flex items-center justify-center text-lg">✕</button>
                             </div>
                         </template>
                     </div>
                 </div>
 
                 <div class="panel-card p-4 rounded-2xl space-y-2">
-                    <label class="text-[11px] font-black tracking-wider text-slate-400 uppercase font-mono block">Watering Days</label>
+                    <label class="text-xs font-black tracking-wider text-slate-400 uppercase font-mono block">Watering Days</label>
                     <div class="flex flex-wrap gap-1.5">
                         <template x-for="day in ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']">
                             <button @click="toggleWizardDaySelector(day)"
-                                    class="px-3 py-2 rounded-xl border text-xs font-bold transition-all"
+                                    class="px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all"
                                     :class="wizardModel.days.includes(day) ? 'bg-blue-600 border-blue-500 text-white' : 'bg-slate-900 border-slate-800 text-slate-400'"
                                     x-text="day"></button>
                         </template>
                     </div>
                 </div>
 
-                <!-- 10 ZONE AND 6 COMPARTMENT STEP MATRIX CONFIGURATION MAPPER -->
                 <div class="space-y-2">
                     <div class="space-y-1">
-                        <label class="text-[11px] font-black tracking-wider text-slate-400 uppercase font-mono block">Zone & Fertilizer Integration Grid</label>
-                        <p class="text-[11px] text-slate-400 leading-tight">Map absolute sequence duration matrix across 10 output zones and 6 fertilizer compartments.</p>
+                        <label class="text-xs font-black tracking-wider text-slate-400 uppercase font-mono block">Zone & Fertilizer Mapping Array</label>
+                        <p class="text-xs text-slate-400 leading-tight">Configure continuous irrigation metrics across all 10 zones and inject from any of the 6 fertilizer containers.</p>
                     </div>
 
                     <div class="space-y-3">
                         <template x-for="z in 10" :key="'wiz-zone-'+z">
-                            <div class="panel-card p-4 rounded-2xl space-y-3 border-l-2 border-emerald-500">
+                            <div class="panel-card p-4 rounded-2xl space-y-3 border-l-4 border-emerald-500">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-xs font-black text-white flex items-center gap-1">💧 Zone <span x-text="z"></span> Matrix</span>
+                                    <span class="text-sm font-black text-white flex items-center gap-1">💧 Zone <span x-text="z"></span> Grid Integration</span>
                                 </div>
                                 
-                                <div class="flex justify-between items-center bg-slate-950/40 p-2 rounded-xl border border-slate-800 text-xs">
-                                    <span class="text-slate-400 font-medium">Water Duration</span>
-                                    <div class="flex items-center gap-1.5">
-                                        <input type="number" x-model.number="wizardModel.zoneDurations[z]" class="w-14 input-field rounded-lg p-1.5 text-center font-bold">
-                                        <span class="text-slate-500 font-mono">mins</span>
+                                <div class="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-xl border border-slate-800 text-sm">
+                                    <span class="text-slate-300 font-medium">Water Duration</span>
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" x-model.number="wizardModel.zoneDurations[z]" class="w-16 input-field rounded-lg p-2 text-center font-bold text-base">
+                                        <span class="text-slate-400 font-mono font-bold">mins</span>
                                     </div>
                                 </div>
 
                                 <div class="space-y-2 pl-3 border-l border-slate-800">
                                     <template x-for="(inj, iIdx) in wizardModel.fertilizerInjections.filter(i => i.zone === z)" :key="'inj-'+iIdx">
                                         <div class="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80 text-xs space-y-2 relative">
-                                            <div class="flex justify-between items-center">
-                                                <select x-model.number="inj.compartment" class="input-field rounded-lg px-2 py-1 text-[11px] font-bold">
+                                            <div class="flex justify-between items-center gap-2">
+                                                <select x-model.number="inj.compartment" class="input-field rounded-lg px-2 py-1.5 font-bold text-xs flex-1">
                                                     <option :value="1">Comp 1</option>
                                                     <option :value="2">Comp 2</option>
                                                     <option :value="3">Comp 3</option>
@@ -392,20 +421,20 @@
                                                     <option :value="5">Comp 5</option>
                                                     <option :value="6">Comp 6</option>
                                                 </select>
-                                                <input type="time" x-model="inj.startTime" class="input-field rounded-lg px-2 py-0.5 font-mono text-center text-[11px]">
-                                                <button @click="wizardModel.fertilizerInjections = wizardModel.fertilizerInjections.filter(item => item !== inj)" class="text-rose-400 font-bold px-1">✕</button>
+                                                <input type="time" x-model="inj.startTime" class="input-field rounded-lg px-2 py-1 font-mono text-center text-xs">
+                                                <button @click="wizardModel.fertilizerInjections = wizardModel.fertilizerInjections.filter(item => item !== inj)" class="text-rose-400 font-black text-sm px-1">✕</button>
                                             </div>
-                                            <div class="flex justify-between items-center text-[11px]">
-                                                <span class="text-slate-500 font-medium">Dosing Duration</span>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-slate-400 font-medium">Dosing Window</span>
                                                 <div class="flex items-center gap-1">
-                                                    <input type="number" x-model.number="inj.duration" class="w-12 input-field rounded-lg p-0.5 text-center font-bold">
+                                                    <input type="number" x-model.number="inj.duration" class="w-14 input-field rounded-lg p-1 text-center font-bold text-xs">
                                                     <span class="text-slate-500">mins</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </template>
                                     
-                                    <button @click="addFertilizerInjectionToZone(z)" class="w-full py-2 border border-dashed border-slate-700 hover:border-slate-500 rounded-xl text-[11px] font-bold text-slate-400 flex items-center justify-center gap-1 transition-colors">
+                                    <button @click="addFertilizerInjectionToZone(z)" class="w-full py-2.5 border border-dashed border-slate-700 hover:border-slate-500 rounded-xl text-xs font-bold text-slate-400 flex items-center justify-center gap-1 transition-colors">
                                         <span>+</span> Link Fertilizer Compartment
                                     </button>
                                 </div>
@@ -416,43 +445,40 @@
             </div>
 
             <footer class="p-4 bg-slate-900/40 border-t border-slate-800 shrink-0">
-                <button @click="saveWizardStateToGlobalSchedules()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 font-black text-xs tracking-wider uppercase rounded-xl text-white transition-colors">
-                    ✔️ Save Grid Schedule
+                <button @click="saveWizardStateToGlobalSchedules()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 font-black text-sm tracking-wider uppercase rounded-xl text-white transition-colors">
+                    ✔️ Save Grid Schedule Matrix
                 </button>
             </footer>
         </div>
 
-        <!-- ZONE OVERRIDE DURATIONS MANIFESTATION DIALOG -->
         <div x-show="overrideModal.show" x-transition.opacity class="fixed inset-0 bg-slate-950/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-            <div class="panel-card w-full max-w-xs p-5 rounded-2xl space-y-4 border border-slate-700/30" @click.away="overrideModal.show = false">
+            <div class="panel-card w-full max-w-xs p-6 rounded-2xl space-y-4 border border-slate-700/30" @click.away="overrideModal.show = false">
                 <div class="text-center">
-                    <h3 class="text-sm font-black text-white uppercase tracking-wider">Manual Overpass Zone <span x-text="overrideModal.zoneId"></span></h3>
-                    <p class="text-[11px] text-slate-400 mt-1">Forced run duration window (minutes).</p>
+                    <h3 class="text-base font-black text-white uppercase tracking-wider">Manual Overpass Zone <span x-text="overrideModal.zoneId"></span></h3>
+                    <p class="text-xs text-slate-400 mt-1.5">Forced run duration window (minutes).</p>
                 </div>
                 <div>
-                    <input type="number" x-model.number="overrideModal.duration" class="w-full input-field rounded-xl p-3 font-mono font-bold text-center text-lg">
+                    <input type="number" x-model.number="overrideModal.duration" class="w-full input-field rounded-xl p-3 font-mono font-bold text-center text-xl">
                 </div>
-                <div class="grid grid-cols-2 gap-2 text-xs font-bold font-mono">
-                    <button @click="overrideModal.show = false" class="w-full py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 uppercase text-[10px]">Cancel</button>
-                    <button @click="commitZoneManualOverride()" class="w-full py-2.5 rounded-xl bg-blue-600 text-white uppercase text-[10px]">Deploy</button>
+                <div class="grid grid-cols-2 gap-3 text-xs font-bold font-mono">
+                    <button @click="overrideModal.show = false" class="w-full py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 uppercase tracking-wider">Cancel</button>
+                    <button @click="commitZoneManualOverride()" class="w-full py-3 rounded-xl bg-blue-600 text-white uppercase tracking-wider">Deploy</button>
                 </div>
             </div>
         </div>
 
-        <!-- CONTROL PANEL FOOTER MODULES BAR -->
         <footer class="glass-card absolute bottom-0 left-0 right-0 z-40 p-3 flex gap-2 border-t border-slate-900 bg-[#070e1c]/90 backdrop-blur-md shrink-0">
             <button @click="currentView = (currentView === 'dashboard' ? 'config' : 'dashboard')" 
-                    class="flex-1 bg-white font-black text-xs text-slate-950 py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 tracking-wider uppercase shadow-md active:scale-[0.99] transition-all">
+                    class="flex-1 bg-white font-black text-sm text-slate-950 py-4 px-4 rounded-xl flex items-center justify-center gap-2 tracking-wider uppercase shadow-md active:scale-[0.99] transition-all">
                 🎛️ <span x-text="currentView === 'dashboard' ? 'Automations & Settings' : 'Back to Dashboard'">Automations & Settings</span>
             </button>
             <button @click="triggerEmergencyShutdownShutoff()" 
-                    class="bg-rose-600/10 border border-rose-500/30 hover:bg-rose-600 text-rose-500 hover:text-white px-4 rounded-xl font-bold flex items-center justify-center transition-all active:scale-[0.96]">
+                    class="bg-rose-600/10 border border-rose-500/30 hover:bg-rose-600 text-rose-500 hover:text-white px-5 rounded-xl font-bold flex items-center justify-center transition-all active:scale-[0.96] text-lg">
                 🛑
             </button>
         </footer>
     </div>
 
-    <!-- ENGINE CONTROL SCRIPTS AND PROCESSORS -->
     <script>
         function sipConsoleApp() {
             return {
@@ -468,10 +494,10 @@
                 activeLiveZone: 0,
                 activeLiveCompartment: 0,
 
-                // UPDATED: 3-Phase RYB Framework and Power Calculations
+                // 3-Phase Multimeter Feed
                 telemetryRYB: {
-                    vR: 230, vY: 231, vB: 229,
-                    cR: 0.0
+                    vR: 412, vY: 415, vB: 410,
+                    cR: '0.0', cY: '0.0', cB: '0.0'
                 },
                 powerReadout: 0,
 
@@ -482,14 +508,17 @@
                     days: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
                 },
 
+                // UPDATED: Independent Three-Phase Protection Bounds (Voltage and Current mapped per phase)
                 hardwareSafety: {
                     enabled: true,
-                    vMin: 180,
-                    vMax: 260,
-                    cMax: 16
+                    vMinR: 360, vMaxR: 460,
+                    vMinY: 360, vMaxY: 460,
+                    vMinB: 360, vMaxB: 460,
+                    cMinR: 0.5, cMaxR: 12.5,
+                    cMinY: 0.5, cMaxY: 12.5,
+                    cMinB: 0.5, cMaxB: 12.5
                 },
 
-                // UPDATED: Global Storage Arrays handling updated matrix counts (10 zones)
                 globalSchedules: [
                     {
                         times: ['22:32', '06:00'],
@@ -526,17 +555,17 @@
                     if (this.backwashConfig.enabled && this.backwashConfig.days.includes(currentDayStr)) {
                         if (this.isCurrentTimeInsideWindow(curHHMM, this.backwashConfig.runTime, this.backwashConfig.duration)) {
                             this.currentSystemState = 'BACKWASHING';
-                            this.statusSubtitleText = 'Terminal system flush protocol active.';
+                            this.statusSubtitleText = 'System boundary backwash flush sequence ongoing.';
                             this.mainPumpActive = true;
                             this.fertPumpActive = false;
-                            this.activeLiveZone = 10; // Flushes using boundary terminal zone 10
+                            this.activeLiveZone = 10; 
                             this.activeLiveCompartment = 0;
                             this.computeElectricalTelemetryFields(true, false);
                             return;
                         }
                     }
 
-                    // 2. Scan Matrix Automation Pipeline Schedules
+                    // 2. Scan Automation Matrix Profiles Matrix
                     let matchFound = false;
                     for (let sched of this.globalSchedules) {
                         if (!sched.active || !sched.days.includes(currentDayStr)) continue;
@@ -592,7 +621,7 @@
                     let runningOffset = startAbs;
 
                     this.currentSystemState = 'AUTOMATION ACTIVE';
-                    this.statusSubtitleText = 'Running active system profile grid calculations.';
+                    this.statusSubtitleText = 'Executing system matrix profile pipelines.';
 
                     let evaluatedZone = 0;
                     for (let z = 1; z <= 10; z++) {
@@ -626,30 +655,40 @@
                     this.computeElectricalTelemetryFields(this.mainPumpActive, this.fertPumpActive);
                 },
 
-                // UPDATED: Compute RYB phase electrical arrays and compound total load variables
+                // Simulated telemetry values for line-to-line 3-phase readings (~415V)
                 computeElectricalTelemetryFields(pump, fert) {
                     if (!this.systemOnline) {
                         this.telemetryRYB.cR = '0.0';
+                        this.telemetryRYB.cY = '0.0';
+                        this.telemetryRYB.cB = '0.0';
                         this.powerReadout = 0;
                         return;
                     }
                     
-                    // Emulated variance mapping across 3 separate transformer feeds
-                    this.telemetryRYB.vR = Math.floor(228 + Math.random() * 5);
-                    this.telemetryRYB.vY = Math.floor(229 + Math.random() * 4);
-                    this.telemetryRYB.vB = Math.floor(227 + Math.random() * 6);
+                    // Generating Line-to-Line 3-Phase Voltages (e.g., R-Y, Y-B, B-R)
+                    this.telemetryRYB.vR = Math.floor(408 + Math.random() * 8);
+                    this.telemetryRYB.vY = Math.floor(411 + Math.random() * 6);
+                    this.telemetryRYB.vB = Math.floor(406 + Math.random() * 9);
 
                     if (pump && fert) {
-                        this.telemetryRYB.cR = (6.2 + Math.random() * 0.5).toFixed(2);
+                        this.telemetryRYB.cR = (9.2 + Math.random() * 0.4).toFixed(1);
+                        this.telemetryRYB.cY = (9.4 + Math.random() * 0.3).toFixed(1);
+                        this.telemetryRYB.cB = (9.1 + Math.random() * 0.5).toFixed(1);
                     } else if (pump) {
-                        this.telemetryRYB.cR = (4.1 + Math.random() * 0.3).toFixed(2);
+                        this.telemetryRYB.cR = (7.4 + Math.random() * 0.3).toFixed(1);
+                        this.telemetryRYB.cY = (7.5 + Math.random() * 0.2).toFixed(1);
+                        this.telemetryRYB.cB = (7.3 + Math.random() * 0.4).toFixed(1);
                     } else {
                         this.telemetryRYB.cR = '0.0';
+                        this.telemetryRYB.cY = '0.0';
+                        this.telemetryRYB.cB = '0.0';
                     }
 
-                    // True total power computed using active phase current draw across balanced load matrices
-                    const currentVal = parseFloat(this.telemetryRYB.cR);
-                    this.powerReadout = Math.round(currentVal * this.telemetryRYB.vR * 1.732); // 3-Phase power equation calculation model
+                    // True 3-Phase Wattage calculation formula: P = sqrt(3) * V_avg * I_avg * PF
+                    const avgVolt = (this.telemetryRYB.vR + this.telemetryRYB.vY + this.telemetryRYB.vB) / 3;
+                    const avgCurr = (parseFloat(this.telemetryRYB.cR) + parseFloat(this.telemetryRYB.cY) + parseFloat(this.telemetryRYB.cB)) / 3;
+                    
+                    this.powerReadout = Math.round(1.732 * avgVolt * avgCurr * 0.85);
                 },
 
                 toggleZoneDirectly(zoneId, status) {
@@ -692,11 +731,11 @@
                 },
 
                 commitBackwashChanges() {
-                    alert("System Backwash settings successfully updated.");
+                    alert("System Backwash parameters written onto device flash memory.");
                 },
 
                 commitSafetyLimits() {
-                    alert("Motor hardware safety profiles written onto flash memory storage parameters.");
+                    alert("All individual 3-Phase voltage and current limits written onto flash storage registers.");
                 },
 
                 toggleBackwashDay(day) {
@@ -719,7 +758,6 @@
                     } else {
                         this.wizardModel.times = ['06:00'];
                         this.wizardModel.days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-                        // Initialize all 10 zones inside builder model block definitions
                         this.wizardModel.zoneDurations = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 };
                         this.wizardModel.fertilizerInjections = [];
                     }
@@ -743,7 +781,7 @@
                 addFertilizerInjectionToZone(zoneId) {
                     this.wizardModel.fertilizerInjections.push({
                         zone: zoneId,
-                        compartment: 1, // Defaulting initialization layer
+                        compartment: 1, 
                         startTime: '06:01',
                         duration: 1
                     });
@@ -790,7 +828,7 @@
                     this.currentSystemState = 'STANDBY';
                     this.globalSchedules.forEach(s => s.active = false);
                     this.computeElectricalTelemetryFields(false, false);
-                    alert("🚨 EMERGENCY SYSTEM OVERRIDE: Connection severed completely. Automation maps and structural grids are now safely locked out.");
+                    alert("🚨 EMERGENCY SYSTEM OVERRIDE: 3-Phase line distribution breaker open. All scheduled processes stopped.");
                 }
             }
         }
